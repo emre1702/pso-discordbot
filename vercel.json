@@ -3,8 +3,7 @@
     "functions": {
         "backend/dist/main.js": {
             "maxDuration": 10,
-            "memory": 1024,
-            "runtime": "nodejs22.x"
+            "memory": 1024
         }
     },
     "rewrites": [
