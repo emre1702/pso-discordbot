@@ -1,0 +1,15 @@
+{
+    "nxConsole.generateAiAgentRules": true,
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "always",
+        "source.organizeImports": "always",
+        "source.addMissingImports": "always",
+        "source.removeUnused": "always",
+        "source.sortImports": "always",
+        "source.fixAll": "always"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.prettierPath": "./node_modules/prettier"
+}
