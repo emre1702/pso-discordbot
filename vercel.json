@@ -7,5 +7,6 @@
         }
     ],
     "buildCommand": "npm run build",
-    "installCommand": "npm run install:all"
+    "installCommand": "npm run install:all",
+    "outputDirectory": "backend/dist"
 }
