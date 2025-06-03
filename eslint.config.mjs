@@ -1,3 +1,4 @@
+import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsparser from "@typescript-eslint/parser";
 import prettierConfig from "eslint-config-prettier";
@@ -13,15 +14,17 @@ export default [
         plugins: {
             "@typescript-eslint": tseslint,
             prettier: prettierPlugin,
+            "@stylistic": stylistic,
         },
         rules: {
             ...tseslint.configs.recommended.rules,
             ...prettierConfig.rules,
             "@typescript-eslint/no-unused-vars": "warn",
+            "@typescript-eslint/explicit-function-return-type": "error",
             "no-console": "warn",
-            semi: ["error", "always"],
+            "@stylistic/semi": ["error", "always"],
             "prettier/prettier": "error",
-            "@stylistic/js/quotes": ["error", "double", { allowTemplateLiterals: "always" }],
+            "@stylistic/quotes": ["error", "double", { allowTemplateLiterals: "always" }],
         },
     },
 ];

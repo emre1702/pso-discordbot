@@ -12,12 +12,6 @@
         "strictBindCallApply": true,
         "forceConsistentCasingInFileNames": true,
         "noFallthroughCasesInSwitch": true,
-        "paths": {
-            "@backend/*": ["./backend/src/*"],
-            "@frontend/*": ["./frontend/src/*"],
-            "@shared/*": ["./shared/dist/*"],
-            "@prisma/client": ["./backend/node_modules/@prisma/client"]
-        },
         "plugins": [{ "transform": "ts-auto-mock/transformer", "cacheBetweenTests": false }]
     }
 }
