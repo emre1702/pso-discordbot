@@ -4,7 +4,7 @@
         "@typescript-eslint/parser": "^8.33.1"
     },
     "scripts": {
-        "install": "npm install && cd backend && npm install",
+        "install:all": "npm install && cd backend && npm install",
         "build": "cd backend && npm run build",
         "dev": "cd backend && npm run start:dev"
     },
