@@ -8,7 +8,7 @@
         "build": "cd backend && npm run build",
         "dev": "cd backend && npm run start:dev"
     },
-    "name": "ult",
+    "name": "pso-discordbot",
     "version": "0.0.1",
     "devDependencies": {
         "@eslint/css": "^0.8.1",
