@@ -1,4 +1,4 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
-    "buildCommand": "nx build discordbot"
+    "buildCommand": "npm run build"
 }
