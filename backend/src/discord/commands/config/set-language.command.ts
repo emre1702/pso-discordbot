@@ -5,7 +5,7 @@ import { resolveKey } from "@sapphire/plugin-i18next";
 import { PermissionFlagsBits } from "discord.js";
 
 export class SetLanguageCommand extends Command {
-    public constructor(context: Command.LoaderContext, options: Command.Options) {
+    constructor(context: Command.LoaderContext, options: Command.Options) {
         super(context, {
             ...options,
             description: "Change your language preference (DM) or server language (server)",
@@ -14,7 +14,7 @@ export class SetLanguageCommand extends Command {
         });
     }
 
-    public override registerApplicationCommands(registry: Command.Registry): Awaitable<void> {
+    override registerApplicationCommands(registry: Command.Registry): Awaitable<void> {
         const languageService = this.container.moduleRef.get(LanguageService, { strict: false });
 
         registry.registerChatInputCommand((builder) =>
@@ -32,7 +32,7 @@ export class SetLanguageCommand extends Command {
         );
     }
 
-    public async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
+    async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
         const languageService = this.container.moduleRef.get(LanguageService, { strict: false });
         const selectedLanguage = interaction.options.getString("language", true) as Language;
 
