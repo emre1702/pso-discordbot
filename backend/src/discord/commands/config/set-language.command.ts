@@ -1,4 +1,4 @@
-import { LanguageService } from "@backend/services/config/language.service";
+import { LanguageService } from "@backend/language/language.service";
 import { language as Language } from "@prisma/client";
 import { Awaitable, Command, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { PermissionFlagsBits } from "discord.js";
@@ -14,7 +14,7 @@ export class SetLanguageCommand extends Command {
     }
 
     public override registerApplicationCommands(registry: Command.Registry): Awaitable<void> {
-        const languageService = this.container.moduleRef.get(LanguageService);
+        const languageService = this.container.moduleRef.get(LanguageService, { strict: false });
 
         registry.registerChatInputCommand((builder) =>
             builder //
@@ -32,7 +32,7 @@ export class SetLanguageCommand extends Command {
     }
 
     public async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
-        const languageService = this.container.moduleRef.get(LanguageService);
+        const languageService = this.container.moduleRef.get(LanguageService, { strict: false });
         const selectedLanguage = interaction.options.getString("language", true) as Language;
 
         if (interaction.inGuild() && interaction.guildId) {

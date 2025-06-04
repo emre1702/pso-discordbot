@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_DIRECT_URL")
+}
+
+model discord_users {
+  id                                    String       @id(map: "discord-user_pkey")
+  created_at                            DateTime     @default(now()) @db.Timestamptz(6)
+  language                              language?
+  team_roles                            team_roles[]
+  teams_teams_created_byTodiscord_users teams[]      @relation("teams_created_byTodiscord_users")
+  teams_teams_ownerTodiscord_users      teams[]      @relation("teams_ownerTodiscord_users")
+
+  @@map("discord-users")
+}
+
+model guilds {
+  id             String    @id
+  joined_at      DateTime  @default(now()) @db.Timestamptz(6)
+  language       language?
+  last_joined_at DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model team_roles {
+  team_id       String        @db.Uuid
+  user_id       String
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  role          team_role?    @default(Player)
+  teams         teams         @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  discord_users discord_users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([team_id, user_id])
+  @@map("team-roles")
+}
+
+model teams {
+  id                                            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                          String
+  short_name                                    String
+  created_at                                    DateTime       @default(now()) @db.Timestamptz(6)
+  created_by                                    String?        @default("NULL")
+  owner                                         String?        @default("NULL")
+  team_roles                                    team_roles[]
+  discord_users_teams_created_byTodiscord_users discord_users? @relation("teams_created_byTodiscord_users", fields: [created_by], references: [id])
+  discord_users_teams_ownerTodiscord_users      discord_users? @relation("teams_ownerTodiscord_users", fields: [owner], references: [id])
+}
+
+enum language {
+  en_US @map("en-US")
+  tr
+}
+
+enum team_role {
+  Player
+  Co_Captain @map("Co-Captain")
+  Captain
+}

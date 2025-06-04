@@ -1,4 +1,4 @@
-import { LanguageService } from "@backend/services/config/language.service";
+import { LanguageService } from "@backend/language/language.service";
 import { Awaitable, Command, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 
 export class SetLanguageCommand extends Command {
@@ -20,14 +20,14 @@ export class SetLanguageCommand extends Command {
     }
 
     public async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
-        const languageService = this.container.moduleRef.get(LanguageService);
+        const languageService = this.container.moduleRef.get(LanguageService, { strict: false });
 
         if (interaction.inGuild() && interaction.guildId) {
             const guildLanguage = await languageService.getGuildLanguage(interaction.guildId);
-            await interaction.reply(`Server language is: ${guildLanguage ? languageService.languageNameMapping[guildLanguage] : "-"}.`);
+            await interaction.reply(`Server language is: ${guildLanguage ? languageService.languageNameMapping[guildLanguage] : "-"}`);
         } else {
             const userLanguage = await languageService.getUserLanguage(interaction.user.id);
-            await interaction.reply(`Your language preference is: ${userLanguage ? languageService.languageNameMapping[userLanguage] : "-"}.`);
+            await interaction.reply(`Your language preference is: ${userLanguage ? languageService.languageNameMapping[userLanguage] : "-"}`);
         }
     }
 }

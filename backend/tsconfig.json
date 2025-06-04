@@ -21,11 +21,11 @@
         "noFallthroughCasesInSwitch": false,
         "resolveJsonModule": true,
         "paths": {
-            "@prisma/client": ["./src/generated/prisma"],
+            "@prisma/client": ["node_modules/.prisma/client"],
             "@backend/*": ["./src/*"],
             "@frontend/*": ["../frontend/src/*"],
             "@shared/*": ["../shared/dist/*"]
         }
     },
-    "include": ["src/**/*.ts", "src/**/*.json"]
+    "include": ["src/**/*.ts", "src/**/*.json", "src/database/generated"]
 }
