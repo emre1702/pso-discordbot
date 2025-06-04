@@ -2,16 +2,16 @@
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "version": 2,
     "builds": [
-        { "src": "backend/dist/**/*.json", "use": "@vercel/static" },
+        { "src": "backend/src/**/*.json", "use": "@vercel/static" },
         {
-            "src": "backend/dist/main.js",
+            "src": "backend/src/main.ts",
             "use": "@vercel/node"
         }
     ],
     "rewrites": [
         {
             "source": "/(.*)",
-            "destination": "backend/dist/main.js"
+            "destination": "backend/src/main.ts"
         }
     ],
     "buildCommand": "npm run build",
