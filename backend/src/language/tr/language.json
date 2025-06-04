@@ -1,0 +1,10 @@
+{
+    "get": {
+        "guild-reply": "Sunucu dili: {{language}}",
+        "user-reply": "Dil tercihiniz: {{language}}"
+    },
+    "set": {
+        "guild-reply": "Sunucu dili {{language}} olarak ayarlandı.",
+        "user-reply": "Dil tercihiniz {{language}} olarak ayarlandı."
+    }
+}

@@ -1,5 +1,6 @@
 import { LanguageService } from "@backend/language/language.service";
 import { Awaitable, Command, CommandOptionsRunTypeEnum } from "@sapphire/framework";
+import { resolveKey } from "@sapphire/plugin-i18next";
 
 export class SetLanguageCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -24,10 +25,12 @@ export class SetLanguageCommand extends Command {
 
         if (interaction.inGuild() && interaction.guildId) {
             const guildLanguage = await languageService.getGuildLanguage(interaction.guildId);
-            await interaction.reply(`Server language is: ${guildLanguage ? languageService.languageNameMapping[guildLanguage] : "-"}`);
+            await interaction.reply(
+                await resolveKey(interaction, "language:get:guild-reply", { language: guildLanguage ? languageService.languageNameMapping[guildLanguage] : "-" })
+            );
         } else {
             const userLanguage = await languageService.getUserLanguage(interaction.user.id);
-            await interaction.reply(`Your language preference is: ${userLanguage ? languageService.languageNameMapping[userLanguage] : "-"}`);
+            await interaction.reply(await resolveKey(interaction, "language:get:user-reply", { language: userLanguage ? languageService.languageNameMapping[userLanguage] : "-" }));
         }
     }
 }

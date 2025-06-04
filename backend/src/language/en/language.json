@@ -1,0 +1,10 @@
+{
+    "get": {
+        "guild-reply": "Server language is: {{language}}",
+        "user-reply": "Your language preference is: {{language}}"
+    },
+    "set": {
+        "guild-reply": "Server language set to {{language}}.",
+        "user-reply": "Your language preference set to {{language}}."
+    }
+}

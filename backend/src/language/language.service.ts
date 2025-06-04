@@ -5,7 +5,7 @@ import { language as Language } from "@prisma/client";
 @Injectable()
 export class LanguageService {
     readonly languageNameMapping: Record<Language, string> = {
-        en_US: "English",
+        en: "English",
         tr: "Türkçe",
     };
 

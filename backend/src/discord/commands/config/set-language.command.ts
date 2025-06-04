@@ -1,6 +1,7 @@
 import { LanguageService } from "@backend/language/language.service";
 import { language as Language } from "@prisma/client";
 import { Awaitable, Command, CommandOptionsRunTypeEnum } from "@sapphire/framework";
+import { resolveKey } from "@sapphire/plugin-i18next";
 import { PermissionFlagsBits } from "discord.js";
 
 export class SetLanguageCommand extends Command {
@@ -37,10 +38,10 @@ export class SetLanguageCommand extends Command {
 
         if (interaction.inGuild() && interaction.guildId) {
             await languageService.setGuildLanguage(interaction.guildId, selectedLanguage);
-            await interaction.reply(`Server language set to ${languageService.languageNameMapping[selectedLanguage]}.`);
+            await interaction.reply(await resolveKey(interaction, "language:set:guild-reply", { language: languageService.languageNameMapping[selectedLanguage] }));
         } else {
             await languageService.setUserLanguage(interaction.user.id, selectedLanguage);
-            await interaction.reply(`Your language preference set to ${languageService.languageNameMapping[selectedLanguage]}.`);
+            await interaction.reply(await resolveKey(interaction, "language:set:user-reply", { language: languageService.languageNameMapping[selectedLanguage] }));
         }
     }
 }

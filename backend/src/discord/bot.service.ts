@@ -1,7 +1,9 @@
 import { GuildService } from "@backend/guild/guild.service";
+import { LanguageService } from "@backend/language/language.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
 import { ApplicationCommandRegistries, container, RegisterBehavior, SapphireClient } from "@sapphire/framework";
+import { InternationalizationContext } from "@sapphire/plugin-i18next";
 import "@sapphire/plugin-i18next/register";
 import { ActivityType, Events } from "discord.js";
 import { join } from "node:path";
@@ -13,6 +15,7 @@ export class BotService {
     constructor(
         private readonly logger: Logger,
         private readonly guildService: GuildService,
+        private readonly languageService: LanguageService,
         moduleRef: ModuleRef
     ) {
         ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(RegisterBehavior.BulkOverwrite);
@@ -27,10 +30,21 @@ export class BotService {
             loadMessageCommandListeners: true,
             baseUserDirectory: __dirname,
             i18n: {
-                defaultName: "en-US",
+                defaultName: "en",
                 defaultLanguageDirectory: join(__dirname, "../language"),
                 hmr: {
                     enabled: process.env.ENVIRONMENT === "development",
+                },
+                fetchLanguage: async (context: InternationalizationContext): Promise<string | null> => {
+                    if (context.guild) {
+                        const guildLanguage = await this.languageService.getGuildLanguage(context.guild.id);
+                        return guildLanguage ?? context.interactionGuildLocale?.split("-")[0] ?? null;
+                    }
+                    if (context.user) {
+                        const userLanguage = await this.languageService.getUserLanguage(context.user.id);
+                        return userLanguage ?? context.interactionLocale?.split("-")[0] ?? null;
+                    }
+                    return null;
                 },
             },
         });

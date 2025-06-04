@@ -51,7 +51,7 @@ model teams {
 }
 
 enum language {
-  en_US @map("en-US")
+  en
   tr
 }
 
