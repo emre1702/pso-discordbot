@@ -5,7 +5,7 @@ import { Injectable } from "@nestjs/common";
 export class GuildService {
     constructor(private readonly database: DatabaseService) {}
 
-    initializeOrUpdateGuild(guildId: string): ReturnType<DatabaseService["guilds"]["upsert"]> {
+    upsertGuildInDb(guildId: string): ReturnType<DatabaseService["guilds"]["upsert"]> {
         return this.database.guilds.upsert({
             where: { id: guildId },
             create: { id: guildId },

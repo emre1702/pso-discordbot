@@ -1,4 +1,4 @@
-import { GuildService } from "@backend/guild/guild.service";
+import { GuildService } from "@backend/discord/guild/guild.service";
 import { LanguageService } from "@backend/language/language.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
@@ -60,7 +60,7 @@ export class BotService {
 
     private addEventListeners(client: SapphireClient): void {
         client.on(Events.GuildAvailable, async (guild) => {
-            await this.guildService.initializeOrUpdateGuild(guild.id);
+            await this.guildService.upsertGuildInDb(guild.id);
         });
 
         client.once(Events.ClientReady, () => {

@@ -1,0 +1,11 @@
+{
+    "set-icon": {
+        "success": "Icon for role {{ roleName }} has been set successfully."
+    },
+    "create": {
+        "exists": "A role with this name does already exist ({{ roleName }}).",
+        "success": "Role {{ roleName }} created successfully.",
+        "error": "An error occurred while creating the role. {{ error }}",
+        "icon-requirement": "Your server must have server boost tier 2 or higher to set a custom role icon. The role will be created without an icon."
+    }
+}

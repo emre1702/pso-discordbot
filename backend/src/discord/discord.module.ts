@@ -1,4 +1,4 @@
-import { GuildModule } from "@backend/guild/guild.module";
+import { GuildModule } from "@backend/discord/guild/guild.module";
 import { LanguageModule } from "@backend/language/language.module";
 import { Logger, Module } from "@nestjs/common";
 import { BotService } from "./bot.service";

@@ -1,13 +1,27 @@
 import { DatabaseService } from "@backend/database/database.service";
 import { Injectable } from "@nestjs/common";
+import { Prisma, teams } from "@prisma/client";
 
 @Injectable()
 export class TeamService {
     constructor(private readonly database: DatabaseService) {}
 
-    addTeam(name: string, shortName: string, ownerId: string, creatorId: string): ReturnType<DatabaseService["teams"]["create"]> {
+    async addTeam(guildId: string, name: string, shortName: string, ownerId: string, creatorId: string): Promise<ReturnType<DatabaseService["teams"]["create"]>> {
+        await this.database.discord_users.upsert({
+            where: { id: ownerId },
+            create: { id: ownerId },
+            update: {},
+        });
+
+        await this.database.discord_users.upsert({
+            where: { id: creatorId },
+            create: { id: creatorId },
+            update: {},
+        });
+
         return this.database.teams.create({
             data: {
+                guild_id: guildId,
                 name,
                 short_name: shortName,
                 owner: ownerId,
@@ -22,10 +36,28 @@ export class TeamService {
         });
     }
 
-    getTeamByNameOrShortName(name: string, shortName: string): ReturnType<DatabaseService["teams"]["findFirst"]> {
+    getTeamByNameOrShortName(guildId: string, name: string, shortName: string): Promise<teams | null> {
         return this.database.teams.findFirst({
             where: {
-                OR: [{ name }, { short_name: shortName }],
+                AND: [
+                    { guild_id: { equals: guildId, mode: "insensitive" } },
+                    {
+                        OR: [
+                            //
+                            { name: { equals: name, mode: "insensitive" } },
+                            { short_name: { equals: shortName, mode: "insensitive" } },
+                        ],
+                    },
+                ],
+            },
+        });
+    }
+
+    deleteTeamByName(guildId: string, name: string): Prisma.PrismaPromise<Prisma.BatchPayload> {
+        return this.database.teams.deleteMany({
+            where: {
+                name: { equals: name, mode: "insensitive" },
+                guild_id: { equals: guildId, mode: "insensitive" },
             },
         });
     }

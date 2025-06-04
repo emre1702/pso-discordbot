@@ -1,0 +1,12 @@
+{
+    "create": {
+        "exists": "A team with this name or short-name does exist ({{ teamName }}).",
+        "success": "Team {{ teamName }} has been created successfully.",
+        "error": "An error occurred while creating the team. {{ error }}"
+    },
+    "delete": {
+        "not-found": "Team with name {{ teamName }} was not found.",
+        "success": "Team {{ teamName }} has been deleted successfully.",
+        "error": "An error occurred while deleting the team. {{ error }}"
+    }
+}
