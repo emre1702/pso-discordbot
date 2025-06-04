@@ -25,7 +25,7 @@ export class BotService {
             i18n: {
                 defaultName: "en-US",
                 hmr: {
-                    enabled: true,
+                    enabled: process.env.ENVIRONMENT === "development",
                 },
             },
         });
@@ -40,7 +40,7 @@ export class BotService {
             this.logger.error("Discord client error: " + error);
         });
 
-        client.login(process.env["DISCORD_TOKEN"]).catch((error) => {
+        client.login(process.env.DISCORD_TOKEN).catch((error) => {
             this.logger.error("Failed to login: " + error);
         });
 
