@@ -1,11 +1,13 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "version": 2,
-    "functions": {
-        "backend/dist/main.js": {
-            "includeFiles": "backend/dist/**/*.json"
+    "builds": [
+        { "src": "backend/dist/**/*.json", "use": "@vercel/static" },
+        {
+            "src": "backend/dist/main.js",
+            "use": "@vercel/node"
         }
-    },
+    ],
     "rewrites": [
         {
             "source": "/(.*)",
