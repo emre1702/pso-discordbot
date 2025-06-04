@@ -3,6 +3,7 @@ import { ModuleRef } from "@nestjs/core";
 import { ApplicationCommandRegistries, container, RegisterBehavior, SapphireClient } from "@sapphire/framework";
 import "@sapphire/plugin-i18next/register";
 import { ActivityType } from "discord.js";
+import { join } from "node:path";
 
 @Injectable()
 export class BotService {
@@ -25,6 +26,7 @@ export class BotService {
             baseUserDirectory: __dirname,
             i18n: {
                 defaultName: "en-US",
+                defaultLanguageDirectory: join(__dirname, "languages"),
             },
         });
 
