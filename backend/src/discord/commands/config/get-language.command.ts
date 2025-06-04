@@ -10,6 +10,7 @@ export class SetLanguageCommand extends Command {
             description: "Get your language preference (DM) or server language (server)",
             name: "get-language",
             runIn: [CommandOptionsRunTypeEnum.Dm, CommandOptionsRunTypeEnum.GuildAny],
+            requiredClientPermissions: [PermissionFlagsBits.ManageGuild],
         });
     }
 

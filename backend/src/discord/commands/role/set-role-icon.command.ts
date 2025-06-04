@@ -9,6 +9,8 @@ export class SetRoleIconCommand extends Command {
             name: "set-role-icon",
             description: "Set the icon for a role",
             runIn: [CommandOptionsRunTypeEnum.GuildAny],
+            requiredClientPermissions: [PermissionFlagsBits.ManageRoles],
+            requiredUserPermissions: [PermissionFlagsBits.ManageRoles],
         });
     }
 

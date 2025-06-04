@@ -12,6 +12,8 @@ export class DeleteTeamCommand extends Command {
             name: "delete-team",
             description: "Delete a team",
             runIn: [CommandOptionsRunTypeEnum.GuildAny],
+            requiredClientPermissions: [PermissionFlagsBits.ManageRoles],
+            requiredUserPermissions: [PermissionFlagsBits.ManageRoles],
         });
     }
 

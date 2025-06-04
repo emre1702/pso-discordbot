@@ -12,6 +12,8 @@ export class CreateTeamCommand extends Command {
             name: "create-team",
             description: "Create a new team",
             runIn: [CommandOptionsRunTypeEnum.GuildAny],
+            requiredClientPermissions: [PermissionFlagsBits.ManageRoles],
+            requiredUserPermissions: [PermissionFlagsBits.ManageRoles],
         });
     }
 
