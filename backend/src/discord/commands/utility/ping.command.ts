@@ -9,7 +9,10 @@ export class Ping extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder.setName("ping").setDescription("Responds with Pong from ping").setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
+            builder
+                .setName("ping")
+                .setDescription("Responds with Pong from ping")
+                .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
         );
     }
 

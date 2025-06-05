@@ -2,7 +2,8 @@
     "extends": "../tsconfig.json",
     "compilerOptions": {
         "strict": true,
-        "module": "commonjs",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
         "declaration": true,
         "removeComments": true,
         "emitDecoratorMetadata": true,

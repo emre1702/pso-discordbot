@@ -6,7 +6,13 @@ import { Prisma, teams } from "@prisma/client";
 export class TeamService {
     constructor(private readonly database: DatabaseService) {}
 
-    async addTeam(guildId: string, name: string, shortName: string, ownerId: string, creatorId: string): Promise<ReturnType<DatabaseService["teams"]["create"]>> {
+    async addTeam(
+        guildId: string,
+        name: string,
+        shortName: string,
+        ownerId: string,
+        creatorId: string
+    ): Promise<ReturnType<DatabaseService["teams"]["create"]>> {
         await this.database.discord_users.upsert({
             where: { id: ownerId },
             create: { id: ownerId },
@@ -36,18 +42,28 @@ export class TeamService {
         });
     }
 
+    getTeamIdByName(guildId: string, name: string): Promise<string | undefined> {
+        return this.database.teams
+            .findFirst({
+                where: {
+                    guild_id: guildId,
+                    name: { equals: name, mode: "insensitive" },
+                },
+                select: {
+                    id: true,
+                },
+            })
+            .then((team) => team?.id);
+    }
+
     getTeamByNameOrShortName(guildId: string, name: string, shortName: string): Promise<teams | null> {
         return this.database.teams.findFirst({
             where: {
-                AND: [
-                    { guild_id: { equals: guildId, mode: "insensitive" } },
-                    {
-                        OR: [
-                            //
-                            { name: { equals: name, mode: "insensitive" } },
-                            { short_name: { equals: shortName, mode: "insensitive" } },
-                        ],
-                    },
+                guild_id: guildId,
+                OR: [
+                    //
+                    { name: { equals: name, mode: "insensitive" } },
+                    { short_name: { equals: shortName, mode: "insensitive" } },
                 ],
             },
         });

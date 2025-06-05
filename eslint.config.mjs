@@ -25,6 +25,15 @@ export default [
             "@stylistic/semi": ["error", "always"],
             "prettier/prettier": "error",
             "@stylistic/quotes": ["error", "double", { allowTemplateLiterals: "always" }],
+            "@stylistic/max-len": [
+                "error",
+                {
+                    code: 140,
+                    ignoreUrls: true,
+                    ignoreComments: true,
+                    ignoreStrings: true,
+                },
+            ],
         },
     },
 ];
