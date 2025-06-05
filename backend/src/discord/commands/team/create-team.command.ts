@@ -1,6 +1,5 @@
 import { RoleService } from "@backend/discord/role/role.service";
 import { TeamService } from "@backend/team/team.service";
-import { Logger } from "@nestjs/common";
 import { Awaitable, Command, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { resolveKey } from "@sapphire/plugin-i18next";
 import { ColorResolvable, GuildPremiumTier, PermissionFlagsBits } from "discord.js";
@@ -74,7 +73,6 @@ export class CreateTeamCommand extends Command {
 
         const teamService = this.container.moduleRef.get(TeamService, { strict: false });
         const roleService = this.container.moduleRef.get(RoleService, { strict: false });
-        const logger = this.container.moduleRef.get(Logger, { strict: false });
 
         const alreadyCreatedTeam = await teamService.getTeamByNameOrShortName(interaction.guildId!, teamName, shortName);
         if (alreadyCreatedTeam) {
@@ -87,7 +85,7 @@ export class CreateTeamCommand extends Command {
             team = await teamService.addTeam(interaction.guildId!, teamName, shortName, owner.id, interaction.user.id);
             await interaction.followUp(await resolveKey(interaction, "team:create:success", { teamName: team.name }));
         } catch (error) {
-            logger.error(`Failed to create team: ${error}`);
+            this.container.nestLogger.error(`Failed to create team: ${error}`);
             await interaction.followUp(await resolveKey(interaction, "team:create:error", { error: error instanceof Error ? error.message : "Unknown error" }));
             return;
         }
@@ -110,7 +108,7 @@ export class CreateTeamCommand extends Command {
             // Assign the role to the team owner
             await interaction.guild!.members.fetch(owner.id).then((member) => member.roles.add(role, "Owner of the team " + team.name));
         } catch (error) {
-            logger.error(`Failed to create role for team: ${error}`);
+            this.container.nestLogger.error(`Failed to create role for team: ${error}`);
             await interaction.followUp(await resolveKey(interaction, "role:create:error", { error: error instanceof Error ? error.message : "Unknown error" }));
             return;
         }
