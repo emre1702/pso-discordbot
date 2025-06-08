@@ -1,0 +1,10 @@
+{
+    "guild-setting": {
+        "list": "**Guild Settings:**",
+        "not-set": "Not set",
+        "get": "Setting '**{{ key }}**' is set to '**{{ value }}**'",
+        "set": "Setting '**{{ key }}**' has been set to '**{{ value }}**'",
+        "reset": "Setting '**{{ key }}**' has been reset to its default value",
+        "not-found": "Setting '**{{ key }}**' not found"
+    }
+}

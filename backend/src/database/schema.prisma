@@ -20,10 +20,9 @@ model discord_users {
 }
 
 model guilds {
-  id             String    @id
-  joined_at      DateTime  @default(now()) @db.Timestamptz(6)
-  language       language?
-  last_joined_at DateTime  @default(now()) @db.Timestamptz(6)
+  id             String   @id
+  joined_at      DateTime @default(now()) @db.Timestamptz(6)
+  last_joined_at DateTime @default(now()) @db.Timestamptz(6)
   teams          teams[]
 }
 
@@ -81,6 +80,16 @@ model seasons {
   teams              teams?    @relation(fields: [champion_team_id], references: [id])
 }
 
+model guild_settings {
+  guild_id   String
+  setting    guild_setting
+  value      String?
+  created_at DateTime      @default(now()) @db.Timestamptz(6)
+
+  @@id([guild_id, setting])
+  @@map("guild-settings")
+}
+
 enum language {
   en
   tr
@@ -90,4 +99,10 @@ enum team_role {
   Player
   Co_Captain @map("Co-Captain")
   Captain
+}
+
+enum guild_setting {
+  language
+
+  @@map("guild-setting")
 }

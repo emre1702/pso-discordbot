@@ -7,7 +7,7 @@
             "success": "The match ({{ homeTeam }} vs {{ awayTeam }}) has been successfully created."
         },
         "list": {
-            "title": "Matches:",
+            "title": "**Matches:**",
             "team-not-found": "The team with the name {{ teamName }} was not found. Please contact the league administrator.",
             "error": "An error occurred while listing the matches. {{ error }}"
         }
@@ -17,14 +17,14 @@
             "invalid-start-date-format": "Invalid start date format. Please use DD.MM.YYYY.",
             "invalid-end-date-format": "Invalid end date format. Please use DD.MM.YYYY.",
             "error": "An error occurred while creating the season. {{ error }}",
-            "success": "The season ({{ season }}) has been successfully created ({{ startDate }} - {{ endDate }})."
+            "success": "Season {{ season }} has been successfully created ({{ startDate }} - {{ endDate }})."
         },
         "list": {
             "season": "Season",
-            "success": "Seasons:\n{{ seasons }}",
+            "success": "**Seasons:**\n{{ seasons }}",
             "error": "An error occurred while listing the seasons. {{ error }}",
             "no-start-date": "No start date",
-            "no-end-date": "No start date",
+            "no-end-date": "No end date",
             "no-seasons": "No seasons found.",
             "champion": "Champion: {{ champion }}.",
             "no-champion": "No champion"

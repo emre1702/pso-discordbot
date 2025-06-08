@@ -55,30 +55,15 @@ export class SeasonCommand extends Subcommand {
                         .addStringOption((option) =>
                             option.setName("end_date").setDescription("The end date of the season (DD.MM.YYYY)").setRequired(false)
                         )
-                        .addBooleanOption((option) =>
-                            option
-                                .setName("show_to_public")
-                                .setDescription("Output the season in the channel for everyone to see (default: false)")
-                                .setRequired(false)
-                        )
+                        .addShowToPublicOption()
                 )
-                .addSubcommand((subcommand) =>
-                    subcommand
-                        .setName("list")
-                        .setDescription("List all seasons")
-                        .addBooleanOption((option) =>
-                            option
-                                .setName("show_to_public")
-                                .setDescription("Output the seasons in the channel for everyone to see (default: false)")
-                                .setRequired(false)
-                        )
-                )
+                .addSubcommand((subcommand) => subcommand.setName("list").setDescription("List all seasons").addShowToPublicOption())
                 .addSubcommand((subcommand) => subcommand.setName("edit").setDescription("Edit an existing season"))
         );
     }
 
     async chatInputCreate(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        const showToPublic = interaction.options.getBoolean("show_to_public") ?? false;
+        const showToPublic = interaction.options.getShowToPublic();
         await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
 
         let startDate: Date;
@@ -136,7 +121,7 @@ export class SeasonCommand extends Subcommand {
 
     async chatInputList(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
         const tFunction = await fetchT(interaction);
-        const showToPublic = interaction.options.getBoolean("show_to_public") ?? false;
+        const showToPublic = interaction.options.getShowToPublic();
         await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
 
         try {
