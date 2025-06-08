@@ -74,9 +74,9 @@ export class GuildSettingService implements OnModuleInit {
 
     private async initDefaultSettings(): Promise<void> {
         const defaultSettings = await this.getDefaults();
-        for (const setting of Object.keys(guildSettingsRecord)) {
-            if (defaultSettings[setting]) {
-                guildSettingsRecord[setting].default = defaultSettings[setting];
+        for (const guildSetting of Object.values(guildSettingsRecord)) {
+            if (defaultSettings[guildSetting.setting]) {
+                guildSetting.defaultValue = defaultSettings[guildSetting.setting];
             }
         }
     }
