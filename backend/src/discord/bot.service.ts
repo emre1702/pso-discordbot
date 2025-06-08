@@ -1,5 +1,5 @@
 import { GuildService } from "@backend/discord/guild/guild.service";
-import { LanguageService } from "@backend/language/language.service";
+import { GuildSettingService } from "@backend/setting/guild-setting.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
 import { ApplicationCommandRegistries, container, RegisterBehavior, SapphireClient } from "@sapphire/framework";
@@ -15,7 +15,7 @@ export class BotService {
     constructor(
         private readonly logger: Logger,
         private readonly guildService: GuildService,
-        private readonly languageService: LanguageService,
+        private readonly guildSettingService: GuildSettingService,
         moduleRef: ModuleRef
     ) {
         ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(RegisterBehavior.BulkOverwrite);
@@ -38,13 +38,13 @@ export class BotService {
                 },
                 fetchLanguage: async (context: InternationalizationContext): Promise<string | null> => {
                     if (context.guild) {
-                        const guildLanguage = await this.languageService.getGuildLanguage(context.guild.id);
+                        const guildLanguage = await this.guildSettingService.get(context.guild.id, "language");
                         return guildLanguage ?? context.interactionGuildLocale?.split("-")[0] ?? null;
                     }
-                    if (context.user) {
+                    /*if (context.user) {
                         const userLanguage = await this.languageService.getUserLanguage(context.user.id);
                         return userLanguage ?? context.interactionLocale?.split("-")[0] ?? null;
-                    }
+                    }*/
                     return null;
                 },
             },

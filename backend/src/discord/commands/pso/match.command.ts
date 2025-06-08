@@ -125,12 +125,7 @@ export class MatchCommand extends Subcommand {
                                 .setMinValue(1)
                                 .setMaxValue(30)
                         )
-                        .addBooleanOption((option) =>
-                            option //
-                                .setName("show_to_public")
-                                .setDescription("Output the list in the channel for everyone to see (default: false)")
-                                .setRequired(false)
-                        )
+                        .addShowToPublicOption()
                 )
                 .addSubcommand((subcommand) =>
                     subcommand
@@ -190,7 +185,7 @@ export class MatchCommand extends Subcommand {
 
     async chatInputListRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
         try {
-            const showToPublic = interaction.options.getBoolean("show_to_public") ?? false;
+            const showToPublic = interaction.options.getShowToPublic();
             await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
 
             const teamRole = interaction.options.getRole("team", true);
