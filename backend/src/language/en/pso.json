@@ -24,7 +24,7 @@
             "success": "**Seasons:**\n{{ seasons }}",
             "error": "An error occurred while listing the seasons. {{ error }}",
             "no-start-date": "No start date",
-            "no-end-date": "No start date",
+            "no-end-date": "No end date",
             "no-seasons": "No seasons found.",
             "champion": "Champion: {{ champion }}.",
             "no-champion": "No champion"
