@@ -1,14 +1,29 @@
 import { DatabaseService } from "@backend/database/database.service";
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { guild_setting } from "@prisma/client";
+import { Subject } from "rxjs";
 import guildSettingsRecord from "./guild-settings";
 
 @Injectable()
-export class GuildSettingService implements OnModuleInit {
+export class GuildSettingService implements OnModuleInit, OnModuleDestroy {
+    private readonly guildSettingChangedSubject = new Subject<{
+        guildId: string;
+        setting: guild_setting;
+        value: string | null;
+    }>();
+    public readonly guildSettingChanged$ = this.guildSettingChangedSubject.asObservable();
+
+    private readonly destroySubject = new Subject<void>();
+
     constructor(private readonly database: DatabaseService) {}
 
     async onModuleInit(): Promise<void> {
         await this.initDefaultSettings();
+    }
+
+    onModuleDestroy(): void {
+        this.destroySubject.next();
+        this.destroySubject.complete();
     }
 
     getAllConfigs(): Readonly<typeof guildSettingsRecord> {
@@ -53,8 +68,12 @@ export class GuildSettingService implements OnModuleInit {
             .then((result) => result?.value ?? guildSettingsRecord[setting].defaultValue);
     }
 
-    set(guildId: string, setting: guild_setting, value: string | null): ReturnType<DatabaseService["guild_settings"]["upsert"]> {
-        return this.database.guild_settings.upsert({
+    async set(
+        guildId: string,
+        setting: guild_setting,
+        value: string | null
+    ): Promise<Awaited<ReturnType<DatabaseService["guild_settings"]["upsert"]>>> {
+        const result = await this.database.guild_settings.upsert({
             where: {
                 guild_id_setting: {
                     guild_id: guildId,
@@ -70,6 +89,10 @@ export class GuildSettingService implements OnModuleInit {
                 value: value,
             },
         });
+
+        this.guildSettingChangedSubject.next({ guildId, setting, value });
+
+        return result;
     }
 
     private async initDefaultSettings(): Promise<void> {

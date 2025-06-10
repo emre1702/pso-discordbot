@@ -4,7 +4,7 @@ import pad from "pad";
 
 interface TableBuilderOptions<T> {
     sortBy?: (keyof T)[];
-    sortDirection?: "asc" | "desc";
+    sortDirection?: "asc" | "desc" | ("asc" | "desc")[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,8 +85,11 @@ export class TableBuilder<T> {
     }
 
     private _createHeader(): T {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return this._columns.reduce((header, col) => (header[col.field] = col.label), {} as any);
+        return this._columns.reduce((header, col) => {
+            header[col.field] = col.label;
+            return header;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        }, {} as any);
     }
 
     private _totalWidth(): number {
@@ -100,14 +103,16 @@ export class TableBuilder<T> {
             let diff = 0;
 
             // Go through each of the sortBy columns, ordered in descending priority
+            let index = 0;
             for (const columnField of this._options.sortBy!) {
                 const field = this._columns.find((col) => col.field === columnField)!.field;
-                diff = this._compareValues(a[field], b[field]);
+                diff = this._compareValues(a[field], b[field], index);
 
                 // Only continue if the cells are equal in the current column
                 if (diff !== 0) {
                     break;
                 }
+                index++;
             }
 
             return diff;
@@ -115,9 +120,10 @@ export class TableBuilder<T> {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private _compareValues(a: any, b: any): number {
+    private _compareValues(a: any, b: any, index: number): number {
         // Find the label of the column to sort by
-        if (this._options.sortDirection === "desc") {
+        const sortDirection = Array.isArray(this._options.sortDirection) ? this._options.sortDirection[index] : this._options.sortDirection;
+        if (sortDirection === "desc") {
             [a, b] = [b, a];
         }
 

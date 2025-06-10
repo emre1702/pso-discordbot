@@ -151,22 +151,30 @@ export class ServerSettingCommand extends Subcommand {
     }
 
     async chatInputSetRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        const showToPublic = interaction.options.getShowToPublic();
-        await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
-
+        const key = interaction.options.getSubcommand(true);
         const tFunction = await fetchT(interaction);
 
-        const key = interaction.options.getSubcommand(true);
-        const setting = this.guildSettingService.getAllConfigs()[key];
-        if (!setting) {
-            await interaction.editReply(tFunction("config:guild-setting:not-found", { key }));
-            return;
+        try {
+            const showToPublic = interaction.options.getShowToPublic();
+            await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
+
+            const key = interaction.options.getSubcommand(true);
+            const setting = this.guildSettingService.getAllConfigs()[key] as (typeof guildSettingsRecord)[guild_setting] | undefined;
+            if (!setting) {
+                await interaction.editReply(tFunction("config:guild-setting:not-found", { key }));
+                return;
+            }
+
+            const value = interaction.options.getRequiredValueByType(setting.type);
+            await this.guildSettingService.set(interaction.guildId!, setting.setting, String(value));
+
+            const displayedValue = setting.choices?.find((choice) => choice.value === value)?.name ?? value;
+            await interaction.editReply(tFunction("config:guild-setting:set", { key: setting.name, value: displayedValue }));
+        } catch (error) {
+            this.container.nestLogger.error(error);
+            await interaction.editReply(
+                tFunction("config:guild-setting:set-error", { key, error: error instanceof Error ? error.message : String(error) })
+            );
         }
-
-        const value = interaction.options.getString("value", true);
-        await this.guildSettingService.set(interaction.guildId!, setting.setting, value);
-
-        const displayedValue = setting.choices?.find((choice) => choice.value === value)?.name ?? value;
-        await interaction.editReply(tFunction("config:guild-setting:set", { key: setting.name, value: displayedValue }));
     }
 }

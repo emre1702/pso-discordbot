@@ -1,0 +1,12 @@
+{
+    "title": "**Season {{ season }} - Scoreboard**",
+    "team": "Team",
+    "played": "Played",
+    "won": "Won",
+    "drawn": "Drawn",
+    "lost": "Lost",
+    "goalsFor": "GF",
+    "goalsAgainst": "GA",
+    "goalDifference": "GD",
+    "points": "Points"
+}

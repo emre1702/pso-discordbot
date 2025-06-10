@@ -99,7 +99,7 @@ export class SeasonCommand extends Subcommand {
         }
 
         try {
-            const season = await this.seasonService.createSeason(startDate, endDate);
+            const season = await this.seasonService.createSeason(interaction.guildId!, startDate, endDate);
             await interaction.editReply({
                 content: await resolveKey(interaction, "pso:season:create:success", {
                     season,
@@ -125,7 +125,7 @@ export class SeasonCommand extends Subcommand {
         await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
 
         try {
-            const seasons = await this.seasonService.getAllSeasons();
+            const seasons = await this.seasonService.getAllSeasons(interaction.guildId!);
             if (seasons.length === 0) {
                 await interaction.editReply({
                     content: tFunction("pso:season:list:no-seasons"),
