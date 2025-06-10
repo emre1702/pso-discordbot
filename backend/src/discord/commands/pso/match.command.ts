@@ -155,6 +155,7 @@ export class MatchCommand extends Subcommand {
                         )
                         .addShowToPublicOption()
                 )
+                .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
         );
     }
 

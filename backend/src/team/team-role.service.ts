@@ -6,7 +6,17 @@ import { team_role } from "@prisma/client";
 export class TeamRoleService {
     constructor(private readonly database: DatabaseService) {}
 
-    setTeamRole(teamId: string, userId: string, role: team_role): ReturnType<DatabaseService["team_roles"]["upsert"]> {
+    async setTeamRole(
+        teamId: string,
+        userId: string,
+        role: team_role
+    ): Promise<Awaited<ReturnType<DatabaseService["team_roles"]["upsert"]>>> {
+        await this.database.team_roles.deleteMany({
+            where: {
+                user_id: userId,
+            },
+        });
+
         return this.database.team_roles.upsert({
             where: {
                 team_id_user_id: {
