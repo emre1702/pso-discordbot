@@ -60,7 +60,7 @@ export class MatchCommand extends Subcommand {
                         .addRoleOption((option) =>
                             option //
                                 .setName("away")
-                                .setDescription("The home team.")
+                                .setDescription("The away team.")
                                 .setRequired(true)
                         )
                         .addIntegerOption((option) =>
