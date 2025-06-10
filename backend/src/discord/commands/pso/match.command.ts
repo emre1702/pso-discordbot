@@ -155,12 +155,6 @@ export class MatchCommand extends Subcommand {
                         )
                         .addShowToPublicOption()
                 )
-                .addSubcommand((subcommand) =>
-                    subcommand
-                        //
-                        .setName("edit")
-                        .setDescription("Edit a match")
-                )
         );
     }
 
@@ -281,10 +275,5 @@ export class MatchCommand extends Subcommand {
                 season,
             })
         );
-    }
-
-    async chatInputEditRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        // Implementation for editing a match
-        await interaction.reply("Match edited successfully!");
     }
 }
