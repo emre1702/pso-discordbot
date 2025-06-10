@@ -98,4 +98,27 @@ export class MatchService {
             },
         });
     }
+
+    async deleteMatches(
+        guildId: string,
+        homeTeamId: string | undefined,
+        awayTeamId: string | undefined,
+        season: number | null | undefined
+    ): Promise<Prisma.BatchPayload> {
+        if (!season) {
+            season = await this.seasonService.getCurrentSeason(guildId).then((s) => s?.season);
+        }
+        if (!season) {
+            throw NoActiveSeasonError();
+        }
+
+        return this.database.matches.deleteMany({
+            where: {
+                guild_id: guildId,
+                home_team_id: homeTeamId,
+                away_team_id: awayTeamId,
+                seasons: { season },
+            },
+        });
+    }
 }
