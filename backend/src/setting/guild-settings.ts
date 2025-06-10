@@ -22,6 +22,13 @@ const guildSettingsRecord: Record<guild_setting, SettingConfig> = {
             { name: "Turkish", value: language.tr },
         ],
     },
+    [guild_setting.scoreboard_channel]: {
+        setting: guild_setting.scoreboard_channel,
+        name: guild_setting.scoreboard_channel,
+        description: "The channel where the scoreboard is posted",
+        type: "channel",
+        defaultValue: null,
+    },
 };
 
 export default guildSettingsRecord;

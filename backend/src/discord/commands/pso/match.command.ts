@@ -168,7 +168,7 @@ export class MatchCommand extends Subcommand {
             const homeScore = interaction.options.getInteger("home_score", true);
             const awayScore = interaction.options.getInteger("away_score", true);
             const season = interaction.options.getInteger("season");
-            await this.matchService.addMatch(homeTeamId, awayTeamId, homeScore, awayScore, season ?? undefined);
+            await this.matchService.addMatch(homeTeamId, awayTeamId, homeScore, awayScore, interaction.guildId!, season ?? undefined);
             await interaction.editReply(
                 await resolveKey(interaction, "pso:match:create:success", { homeTeam: homeRole.name, awayTeam: awayRole.name })
             );

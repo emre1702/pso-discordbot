@@ -2,10 +2,14 @@ import { DatabaseService } from "@backend/database/database.service";
 import { SeasonService } from "@backend/season/season.service";
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
+import { ReplaySubject } from "rxjs";
 import { NoActiveSeasonError } from "./no-active-season.error";
 
 @Injectable()
 export class MatchService {
+    private readonly matchAddedSubject = new ReplaySubject<{ guildId: string }>();
+    public readonly matchAdded$ = this.matchAddedSubject.asObservable();
+
     constructor(
         private readonly database: DatabaseService,
         private readonly seasonService: SeasonService
@@ -15,10 +19,17 @@ export class MatchService {
      * @throws {@link NoActiveSeasonError}
      * If no active season is found, it will throw an error.
      */
-    async addMatch(homeTeamId: string, awayTeamId: string, homeScore: number, awayScore: number, season?: number): Promise<void> {
+    async addMatch(
+        homeTeamId: string,
+        awayTeamId: string,
+        homeScore: number,
+        awayScore: number,
+        guildId: string,
+        season?: number
+    ): Promise<void> {
         const seasonId = season
-            ? await this.seasonService.getSeasonId(season)
-            : await this.seasonService.getCurrentSeason().then((s) => s?.id);
+            ? await this.seasonService.getSeasonId(season, guildId)
+            : await this.seasonService.getCurrentSeason(guildId).then((s) => s?.id);
 
         if (!seasonId) {
             throw NoActiveSeasonError();
@@ -26,6 +37,7 @@ export class MatchService {
 
         await this.database.matches.create({
             data: {
+                guild_id: guildId,
                 home_team_id: homeTeamId,
                 away_team_id: awayTeamId,
                 home_score: homeScore,
@@ -33,6 +45,8 @@ export class MatchService {
                 season_id: seasonId,
             },
         });
+
+        this.matchAddedSubject.next({ guildId });
     }
 
     getMatchesForList(

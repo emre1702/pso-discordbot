@@ -10,16 +10,17 @@ export class SeasonService {
      * @throws {@link InvalidDateRangeError}
      * If the end date is before the start date.
      */
-    async createSeason(fromDate: Date, toDate?: Date | null): Promise<number> {
+    async createSeason(guildId: string, fromDate: Date, toDate?: Date | null): Promise<number> {
         if (toDate && toDate < fromDate) {
             throw InvalidDateRangeError();
         }
 
-        const lastSeason = (await this.getLastSeason()) ?? 0;
+        const lastSeason = (await this.getLastSeason(guildId))?.season ?? 0;
 
         return this.database.seasons
             .create({
                 data: {
+                    guild_id: guildId,
                     season: lastSeason + 1,
                     from_date: fromDate,
                     to_date: toDate,
@@ -31,9 +32,10 @@ export class SeasonService {
             .then((season) => season?.season);
     }
 
-    getCurrentSeason(): Promise<{ id: string; season: number } | null> {
+    getCurrentSeason(guildId: string): Promise<{ id: string; season: number } | null> {
         return this.database.seasons.findFirst({
             where: {
+                guild_id: guildId,
                 from_date: { lte: new Date() },
                 to_date: { gte: new Date() },
             },
@@ -41,25 +43,26 @@ export class SeasonService {
         });
     }
 
-    getLastSeason(): Promise<number | undefined> {
-        return this.database.seasons
-            .findFirst({
-                orderBy: { season: "desc" },
-                select: { season: true },
-            })
-            .then((season) => season?.season);
+    getLastSeason(guildId: string): Promise<{ id: string; season: number } | null> {
+        return this.database.seasons.findFirst({
+            orderBy: { season: "desc" },
+            select: { id: true, season: true },
+            where: { guild_id: guildId },
+        });
     }
 
-    getSeasonId(season: number): Promise<string | undefined> {
+    getSeasonId(season: number, guildId: string): Promise<string | undefined> {
         return this.database.seasons
             .findUnique({
-                where: { season },
+                where: { season, guild_id: guildId },
                 select: { id: true },
             })
             .then((season) => season?.id);
     }
 
-    getAllSeasons(): Promise<{ season: number; from_date: Date | null; to_date: Date | null; champion_team_name: string | null }[]> {
+    getAllSeasons(
+        guildId: string
+    ): Promise<{ season: number; from_date: Date | null; to_date: Date | null; champion_team_name: string | null }[]> {
         return this.database.seasons.findMany({
             orderBy: { season: "asc" },
             select: {
@@ -68,6 +71,7 @@ export class SeasonService {
                 to_date: true,
                 champion_team_name: true,
             },
+            where: { guild_id: guildId },
         });
     }
 }

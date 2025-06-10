@@ -1,0 +1,12 @@
+{
+    "title": "**Sezon {{ season }} - Puan Tablosu**",
+    "team": "Takım",
+    "played": "M",
+    "won": "G",
+    "drawn": "B",
+    "lost": "M",
+    "goalsFor": "A",
+    "goalsAgainst": "Y",
+    "goalDifference": "AV",
+    "points": "Puan"
+}
