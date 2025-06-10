@@ -1,6 +1,6 @@
 import { Command, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { resolveKey } from "@sapphire/plugin-i18next";
-import { Awaitable, PermissionFlagsBits } from "discord.js";
+import { Awaitable, InteractionContextType, PermissionFlagsBits } from "discord.js";
 
 export class SetRoleIconCommand extends Command {
     constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -32,6 +32,7 @@ export class SetRoleIconCommand extends Command {
                         .setRequired(true)
                 )
                 .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+                .setContexts(InteractionContextType.Guild)
         );
     }
 

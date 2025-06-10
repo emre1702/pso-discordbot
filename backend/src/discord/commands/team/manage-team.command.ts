@@ -3,7 +3,7 @@ import { TeamService } from "@backend/team/team.service";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { fetchT, resolveKey } from "@sapphire/plugin-i18next";
 import { Subcommand } from "@sapphire/plugin-subcommands";
-import { ColorResolvable, GuildPremiumTier, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { ColorResolvable, GuildPremiumTier, InteractionContextType, MessageFlags, PermissionFlagsBits } from "discord.js";
 
 export class ManageTeamCommand extends Subcommand {
     constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -85,6 +85,7 @@ export class ManageTeamCommand extends Subcommand {
                         .addShowToPublicOption()
                 )
                 .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+                .setContexts(InteractionContextType.Guild)
         );
     }
 

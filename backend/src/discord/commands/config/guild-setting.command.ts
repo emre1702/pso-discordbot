@@ -4,7 +4,7 @@ import { guild_setting } from "@prisma/client";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { fetchT } from "@sapphire/plugin-i18next";
 import { Subcommand, SubcommandMappingGroup } from "@sapphire/plugin-subcommands";
-import { APIApplicationCommandOptionChoice, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { APIApplicationCommandOptionChoice, InteractionContextType, MessageFlags, PermissionFlagsBits } from "discord.js";
 
 export class ServerSettingCommand extends Subcommand {
     private readonly guildSettingService: GuildSettingService;
@@ -59,6 +59,7 @@ export class ServerSettingCommand extends Subcommand {
                 .setName(this.name)
                 .setDescription(this.description)
                 .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+                .setContexts(InteractionContextType.Guild)
                 .addSubcommand((subcommand) =>
                     subcommand //
                         .setName("list")

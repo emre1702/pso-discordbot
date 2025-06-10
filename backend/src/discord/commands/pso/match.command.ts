@@ -4,7 +4,7 @@ import { TeamService } from "@backend/team/team.service";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { fetchT, resolveKey } from "@sapphire/plugin-i18next";
 import { Subcommand } from "@sapphire/plugin-subcommands";
-import { MessageFlags, MessagePayload, PermissionFlagsBits } from "discord.js";
+import { InteractionContextType, MessageFlags, MessagePayload, PermissionFlagsBits } from "discord.js";
 
 export class MatchCommand extends Subcommand {
     matchService: MatchService;
@@ -156,6 +156,7 @@ export class MatchCommand extends Subcommand {
                         .addShowToPublicOption()
                 )
                 .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+                .setContexts(InteractionContextType.Guild)
         );
     }
 
