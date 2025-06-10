@@ -20,6 +20,10 @@ declare module "discord.js" {
             choices?: APIApplicationCommandOptionChoice<string>[]
         ): ReturnType<this["addStringOption"] | this["addIntegerOption"] | this["addChannelOption"]>;
     }
+
+    export interface SharedSlashCommandOptions {
+        addShowToPublicOption(): ReturnType<this["addBooleanOption"]>;
+    }
     export interface CommandInteractionOptionResolver {
         getShowToPublic(): boolean;
         getRequiredValueByType(type: SettingValueType): unknown;
