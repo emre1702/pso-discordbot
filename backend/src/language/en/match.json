@@ -1,0 +1,19 @@
+{
+    "create": {
+        "same-teams": "The home and away teams have to be different.",
+        "team-not-found": "The team with the name {{ teamName }} was not found. Please contact the league administrator.",
+        "error": "An error occurred while creating the match. {{ error }}",
+        "success": "The match ({{ homeTeam }} vs {{ awayTeam }}) has been successfully created."
+    },
+    "list": {
+        "title": "**Matches:**",
+        "team-not-found": "The team with the name {{ teamName }} was not found. Please contact the league administrator.",
+        "error": "An error occurred while listing the matches. {{ error }}"
+    },
+    "delete": {
+        "team-not-found": "The team with the name {{ teamName }} was not found. Please contact the league administrator.",
+        "same-teams": "The home and away teams have to be different. One team can't play against itself.",
+        "no-matches-found": "No matches found.",
+        "success": "Successfully deleted {{ count }} match(es) between {{ homeTeam }} and {{ awayTeam }} in the season {{ season }}."
+    }
+}
