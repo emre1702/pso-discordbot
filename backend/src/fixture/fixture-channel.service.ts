@@ -6,7 +6,7 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { guild_setting } from "@prisma/client";
 import { container } from "@sapphire/pieces";
 import { fetchT } from "@sapphire/plugin-i18next";
-import { bold, GuildBasedChannel, GuildChannel, Role, roleMention, TextBasedChannel, time } from "discord.js";
+import { bold, GuildBasedChannel, GuildChannel, Role, roleMention, TextBasedChannel, time, TimestampStyles } from "discord.js";
 import { filter, Subject, takeUntil } from "rxjs";
 
 @Injectable()
@@ -74,6 +74,12 @@ export class FixtureChannelService implements OnModuleInit, OnModuleDestroy {
                             name: true,
                         },
                     },
+                    matches: {
+                        select: {
+                            home_score: true,
+                            away_score: true,
+                        },
+                    },
                 },
             });
 
@@ -113,7 +119,13 @@ export class FixtureChannelService implements OnModuleInit, OnModuleDestroy {
                     );
                 }
 
-                messageContent += `${time(fixture.match_time)} - ${homeTeam} vs ${awayTeam}\n`;
+                if (fixture.matches) {
+                    // eslint-disable-next-line @stylistic/max-len
+                    messageContent += `${time(fixture.match_time, TimestampStyles.ShortTime)}: ${homeTeam} ${fixture.matches.home_score} - ${fixture.matches.away_score} ${awayTeam}\n`;
+                } else {
+                    messageContent += `${time(fixture.match_time, TimestampStyles.ShortTime)}: ${homeTeam} - ${awayTeam}\n`;
+                }
+
                 currentDay = day;
             }
             const messageContents = splitMessageByLength(messageContent);

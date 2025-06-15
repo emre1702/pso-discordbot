@@ -1,4 +1,5 @@
 import { DatabaseService } from "@backend/database/database.service";
+import { FixtureChannelService } from "@backend/fixture/fixture-channel.service";
 import { FixtureService } from "@backend/fixture/fixture.service";
 import { SeasonService } from "@backend/season/season.service";
 import { Injectable } from "@nestjs/common";
@@ -15,7 +16,8 @@ export class MatchService {
     constructor(
         private readonly database: DatabaseService,
         private readonly seasonService: SeasonService,
-        private readonly fixtureService: FixtureService
+        private readonly fixtureService: FixtureService,
+        private readonly fixtureChannelService: FixtureChannelService
     ) {}
 
     /**
@@ -52,6 +54,8 @@ export class MatchService {
         });
 
         this.matchAddedSubject.next({ guildId });
+
+        await this.fixtureChannelService.writeFixtureInChannel(guildId, season);
     }
 
     getMatchesForList(
