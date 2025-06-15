@@ -1,9 +1,11 @@
 import { DatabaseService } from "@backend/database/database.service";
+import { FixtureService } from "@backend/fixture/fixture.service";
 import { SeasonService } from "@backend/season/season.service";
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { ReplaySubject } from "rxjs";
 import { NoActiveSeasonError } from "./no-active-season.error";
+import { NoFixtureFoundError } from "./no-fixture-found.error";
 
 @Injectable()
 export class MatchService {
@@ -12,7 +14,8 @@ export class MatchService {
 
     constructor(
         private readonly database: DatabaseService,
-        private readonly seasonService: SeasonService
+        private readonly seasonService: SeasonService,
+        private readonly fixtureService: FixtureService
     ) {}
 
     /**
@@ -25,24 +28,26 @@ export class MatchService {
         homeScore: number,
         awayScore: number,
         guildId: string,
-        season?: number
+        season?: number,
+        creatorId?: string
     ): Promise<void> {
-        const seasonId = season
-            ? await this.seasonService.getSeasonId(season, guildId)
-            : await this.seasonService.getCurrentSeason(guildId).then((s) => s?.id);
+        season ??= await this.seasonService.getCurrentSeason(guildId).then((s) => s?.season);
 
-        if (!seasonId) {
+        if (!season) {
             throw NoActiveSeasonError();
+        }
+
+        const fixtureId = await this.fixtureService.getFixtureId(guildId, season, homeTeamId, awayTeamId);
+        if (!fixtureId) {
+            throw NoFixtureFoundError();
         }
 
         await this.database.matches.create({
             data: {
-                guild_id: guildId,
-                home_team_id: homeTeamId,
-                away_team_id: awayTeamId,
+                fixture_id: fixtureId,
                 home_score: homeScore,
                 away_score: awayScore,
-                season_id: seasonId,
+                creator_id: creatorId,
             },
         });
 
@@ -56,23 +61,25 @@ export class MatchService {
         amount?: number | null
     ): Prisma.PrismaPromise<
         {
-            seasons: { season: number } | null;
+            fixtures: {
+                season: number;
+                teams_fixtures_home_team_idToteams: { name: string } | null;
+                teams_fixtures_away_team_idToteams: { name: string } | null;
+            };
             home_score: number | null;
             away_score: number | null;
-            teams_matches_home_team_idToteams: { name: string } | null;
-            teams_matches_away_team_idToteams: { name: string } | null;
         }[]
     > {
         const where: Prisma.matchesWhereInput = {
             //
             OR: [
                 //
-                { home_team_id: teamId },
-                { away_team_id: teamId },
+                { fixtures: { home_team_id: teamId } },
+                { fixtures: { away_team_id: teamId } },
             ],
         };
         if (season) {
-            where!.seasons = { season };
+            where!.fixtures = { season };
         }
 
         return this.database.matches.findMany({
@@ -80,21 +87,23 @@ export class MatchService {
             where,
             orderBy: [
                 {
-                    seasons: { season: order ?? "desc" },
+                    fixtures: {
+                        season: order ?? "desc",
+                    },
                 },
                 { created_at: order ?? "desc" },
             ],
             take: amount ?? 3,
             select: {
-                seasons: { select: { season: true } },
+                fixtures: {
+                    select: {
+                        season: true,
+                        teams_fixtures_home_team_idToteams: { select: { name: true } },
+                        teams_fixtures_away_team_idToteams: { select: { name: true } },
+                    },
+                },
                 home_score: true,
                 away_score: true,
-                teams_matches_home_team_idToteams: {
-                    select: { name: true },
-                },
-                teams_matches_away_team_idToteams: {
-                    select: { name: true },
-                },
             },
         });
     }
@@ -112,12 +121,16 @@ export class MatchService {
             throw NoActiveSeasonError();
         }
 
+        const fixtureIds = await this.fixtureService.getFixtureIds(guildId, season, homeTeamId, awayTeamId);
+        if (!fixtureIds?.length) {
+            throw NoFixtureFoundError();
+        }
+
         return this.database.matches.deleteMany({
             where: {
-                guild_id: guildId,
-                home_team_id: homeTeamId,
-                away_team_id: awayTeamId,
-                seasons: { season },
+                fixture_id: {
+                    in: fixtureIds,
+                },
             },
         });
     }

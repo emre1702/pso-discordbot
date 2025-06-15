@@ -1,0 +1,9 @@
+{
+    "create": {
+        "success": "Fikstür {{ season }} sezonu için başarıyla oluşturuldu.",
+        "error": "Fikstür oluşturulurken bir hata oluştu. {{ error }}"
+    },
+    "output": {
+        "week": "{{ week }}. Hafta"
+    }
+}

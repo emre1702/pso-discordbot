@@ -29,6 +29,13 @@ const guildSettingsRecord: Record<guild_setting, SettingConfig> = {
         type: "channel",
         defaultValue: null,
     },
+    [guild_setting.fixture_channel]: {
+        setting: guild_setting.fixture_channel,
+        name: guild_setting.fixture_channel,
+        description: "The channel where the fixture is posted",
+        type: "channel",
+        defaultValue: null,
+    },
 };
 
 export default guildSettingsRecord;

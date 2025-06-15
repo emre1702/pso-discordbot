@@ -1,0 +1,23 @@
+{
+    "create": {
+        "invalid-start-date-format": "Invalid start date format. Please use DD.MM.YYYY.",
+        "invalid-end-date-format": "Invalid end date format. Please use DD.MM.YYYY.",
+        "error": "An error occurred while creating the season. {{ error }}",
+        "success": "Season {{ season }} has been successfully created ({{ startDate }} - {{ endDate }})."
+    },
+    "list": {
+        "season": "Season",
+        "success": "**Seasons:**\n{{ seasons }}",
+        "error": "An error occurred while listing the seasons. {{ error }}",
+        "no-start-date": "No start date",
+        "no-end-date": "No end date",
+        "no-seasons": "No seasons found.",
+        "champion": "Champion: {{ champion }}.",
+        "no-champion": "No champion"
+    },
+    "edit": {
+        "success": "Season {{ season }} has been successfully edited ({{ startDate }} - {{ endDate }}).",
+        "error": "An error occurred while editing the season. {{ error }}",
+        "not-found": "Season {{ season }} not found."
+    }
+}

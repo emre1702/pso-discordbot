@@ -1,5 +1,6 @@
 import { MatchService } from "@backend/match/match.service";
 import { isNoActiveSeasonError } from "@backend/match/no-active-season.error";
+import { isNoFixtureFoundError } from "@backend/match/no-fixture-found.error";
 import { TeamService } from "@backend/team/team.service";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { fetchT, resolveKey } from "@sapphire/plugin-i18next";
@@ -187,12 +188,20 @@ export class MatchCommand extends Subcommand {
             const homeScore = interaction.options.getInteger("home_score", true);
             const awayScore = interaction.options.getInteger("away_score", true);
             const season = interaction.options.getInteger("season");
-            await this.matchService.addMatch(homeTeamId, awayTeamId, homeScore, awayScore, interaction.guildId!, season ?? undefined);
+            await this.matchService.addMatch(
+                homeTeamId,
+                awayTeamId,
+                homeScore,
+                awayScore,
+                interaction.guildId!,
+                season ?? undefined,
+                interaction.user.id
+            );
             await interaction.editReply(
                 await resolveKey(interaction, "match:create:success", { homeTeam: homeRole.name, awayTeam: awayRole.name })
             );
         } catch (error) {
-            if (!isNoActiveSeasonError(error)) {
+            if (!isNoActiveSeasonError(error) && !isNoFixtureFoundError(error)) {
                 this.container.nestLogger.error(`Failed to create match: ${error}`);
             }
             await interaction.editReply(
@@ -222,7 +231,7 @@ export class MatchCommand extends Subcommand {
 
             const content = matches.reduce(
                 (currContent, match) =>
-                    (currContent += `\nSeason ${match.seasons?.season ?? "?"} - ${match.teams_matches_home_team_idToteams?.name ?? "?"} ${match.home_score} - ${match.away_score} ${match.teams_matches_away_team_idToteams?.name ?? "?"}`),
+                    (currContent += `\nSeason ${match.fixtures?.season ?? "?"} - ${match.fixtures.teams_fixtures_home_team_idToteams?.name ?? "?"} ${match.home_score} - ${match.away_score} ${match.fixtures.teams_fixtures_away_team_idToteams?.name ?? "?"}`),
                 await resolveKey(interaction, "match:list:title")
             );
             const message = new MessagePayload(interaction.channel!, { content });

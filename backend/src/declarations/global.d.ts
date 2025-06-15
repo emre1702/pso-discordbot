@@ -46,3 +46,9 @@ declare namespace NodeJS {
         DATABASE_URL: string;
     }
 }
+
+declare global {
+    interface Array<T> {
+        shuffle(): T[];
+    }
+}

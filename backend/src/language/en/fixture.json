@@ -1,0 +1,9 @@
+{
+    "create": {
+        "success": "Fixture for season {{ season }} created successfully.",
+        "error": "An error occurred while creating the fixture. {{ error }}"
+    },
+    "output": {
+        "week": "Week {{ week }}"
+    }
+}

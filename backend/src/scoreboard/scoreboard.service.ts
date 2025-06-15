@@ -2,12 +2,13 @@ import { DatabaseService } from "@backend/database/database.service";
 import { MatchService } from "@backend/match/match.service";
 import { SeasonService } from "@backend/season/season.service";
 import { GuildSettingService } from "@backend/setting/guild-setting.service";
+import { getLastMessage } from "@backend/utils/get-last-message.util";
 import { TableBuilder } from "@backend/utils/table-builder.util";
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { guild_setting } from "@prisma/client";
 import { container } from "@sapphire/framework";
 import { fetchT } from "@sapphire/plugin-i18next";
-import { Guild, GuildBasedChannel, Message, MessageFlags, TextBasedChannel } from "discord.js";
+import { Guild, GuildBasedChannel, MessageFlags } from "discord.js";
 import { filter, merge, Subject, takeUntil } from "rxjs";
 import { ScoreboardRowModel } from "./scoreboard-row.model";
 
@@ -53,7 +54,7 @@ export class ScoreboardService implements OnModuleInit, OnModuleDestroy {
             return;
         }
 
-        const scoreboardMessage = await this.getScoreboardMessage(scoreboardChannel);
+        const scoreboardMessage = await getLastMessage(scoreboardChannel);
         if (!scoreboardMessage) {
             // Create a new scoreboard message if it doesn't exist
             await scoreboardChannel.send({
@@ -88,34 +89,19 @@ export class ScoreboardService implements OnModuleInit, OnModuleDestroy {
         return scoreboardChannel;
     }
 
-    private async getScoreboardMessage(scoreboardChannel: TextBasedChannel, beforeId?: string): Promise<Message | null> {
-        const lastMessage = await scoreboardChannel.messages.fetch({ limit: 1, before: beforeId }).then((messages) => messages.first());
-        if (!lastMessage) {
-            return null;
-        }
-        if (lastMessage.author.id === container.client.user?.id) {
-            return lastMessage;
-        }
-        return this.getScoreboardMessage(scoreboardChannel, lastMessage.id);
-    }
-
     private async createScoreboardMessageContent(guildId: string, season?: number): Promise<string | null> {
         const interaction = container.client.guilds.resolve(guildId);
         const tFunction = await fetchT(interaction as Guild);
 
-        let seasonId: string | undefined;
-        if (season) {
-            seasonId = await this.seasonService.getSeasonId(season, guildId);
-        } else {
+        if (!season) {
             const lastSeason = await this.seasonService.getLastSeason(guildId);
             season = lastSeason?.season;
-            seasonId = lastSeason?.id;
         }
-        if (!seasonId) {
+        if (!season) {
             return null;
         }
 
-        const matches = await this.getMatches(guildId, seasonId);
+        const matches = await this.getMatches(guildId, season);
 
         if (matches.length === 0) {
             return "";
@@ -153,7 +139,7 @@ export class ScoreboardService implements OnModuleInit, OnModuleDestroy {
 
     private async getMatches(
         guildId: string,
-        seasonId: string
+        season: number
     ): Promise<
         {
             home_score: number;
@@ -162,31 +148,41 @@ export class ScoreboardService implements OnModuleInit, OnModuleDestroy {
             away_team: string;
         }[]
     > {
-        return this.databaseService.matches
-            .findMany({
-                where: {
-                    guild_id: guildId,
-                    season_id: seasonId,
+        const fixtures = await this.databaseService.fixtures.findMany({
+            where: {
+                season,
+                guild_id: guildId,
+            },
+            select: {
+                id: true,
+                home_team_id: true,
+                away_team_id: true,
+                teams_fixtures_home_team_idToteams: {
+                    select: { name: true },
                 },
-                select: {
-                    home_score: true,
-                    away_score: true,
-                    teams_matches_home_team_idToteams: {
-                        select: { name: true },
-                    },
-                    teams_matches_away_team_idToteams: {
-                        select: { name: true },
+                teams_fixtures_away_team_idToteams: {
+                    select: { name: true },
+                },
+                matches: {
+                    select: {
+                        home_score: true,
+                        away_score: true,
                     },
                 },
-            })
-            .then((matches) =>
-                matches.map((match) => ({
-                    home_score: match.home_score ?? 0,
-                    away_score: match.away_score ?? 0,
-                    home_team: match.teams_matches_home_team_idToteams?.name || "Unknown",
-                    away_team: match.teams_matches_away_team_idToteams?.name || "Unknown",
-                }))
-            );
+            },
+        });
+
+        return fixtures.map((fixture) => {
+            const homeTeam = fixture.teams_fixtures_home_team_idToteams?.name || "Unknown";
+            const awayTeam = fixture.teams_fixtures_away_team_idToteams?.name || "Unknown";
+            const match = fixture.matches?.[0] || { home_score: 0, away_score: 0 };
+            return {
+                home_score: match.home_score ?? 0,
+                away_score: match.away_score ?? 0,
+                home_team: homeTeam,
+                away_team: awayTeam,
+            };
+        });
     }
 
     private mapToScoreboardRowModels(matches: Awaited<ReturnType<ScoreboardService["getMatches"]>>): ScoreboardRowModel[] {
