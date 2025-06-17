@@ -2,6 +2,7 @@ import { DatabaseService } from "@backend/database/database.service";
 import { FixtureChannelService } from "@backend/fixture/fixture-channel.service";
 import { FixtureService } from "@backend/fixture/fixture.service";
 import { SeasonService } from "@backend/season/season.service";
+import { UserService } from "@backend/user/user.service";
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { ReplaySubject } from "rxjs";
@@ -17,7 +18,8 @@ export class MatchService {
         private readonly database: DatabaseService,
         private readonly seasonService: SeasonService,
         private readonly fixtureService: FixtureService,
-        private readonly fixtureChannelService: FixtureChannelService
+        private readonly fixtureChannelService: FixtureChannelService,
+        private readonly userService: UserService
     ) {}
 
     /**
@@ -43,6 +45,8 @@ export class MatchService {
         if (!fixtureId) {
             throw NoFixtureFoundError();
         }
+
+        if (creatorId) await this.userService.ensureDiscordUserExists(creatorId);
 
         await this.database.matches.create({
             data: {

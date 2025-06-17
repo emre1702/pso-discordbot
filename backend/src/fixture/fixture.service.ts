@@ -1,4 +1,5 @@
 import { DatabaseService } from "@backend/database/database.service";
+import { UserService } from "@backend/user/user.service";
 import { Injectable } from "@nestjs/common";
 import { FixtureChannelService } from "./fixture-channel.service";
 import { FixtureWeekModel } from "./fixture-week.model";
@@ -11,7 +12,8 @@ import { SeasonNotFoundError } from "./season-not-found.error";
 export class FixtureService {
     constructor(
         private readonly database: DatabaseService,
-        private readonly fixtureChannelService: FixtureChannelService
+        private readonly fixtureChannelService: FixtureChannelService,
+        private readonly userService: UserService
     ) {}
 
     async createFixture(
@@ -57,6 +59,8 @@ export class FixtureService {
                 season: options.season,
             },
         });
+
+        await this.userService.ensureDiscordUserExists(creatorId);
 
         const optimalFixture = this.getOptimalFixture(teamIds.length, season.from_date, season.to_date, {
             homeAndAway: options.homeAndAway,

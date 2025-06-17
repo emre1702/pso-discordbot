@@ -1,10 +1,14 @@
 import { DatabaseService } from "@backend/database/database.service";
+import { UserService } from "@backend/user/user.service";
 import { Injectable } from "@nestjs/common";
 import { Prisma, teams } from "@prisma/client";
 
 @Injectable()
 export class TeamService {
-    constructor(private readonly database: DatabaseService) {}
+    constructor(
+        private readonly database: DatabaseService,
+        private readonly userService: UserService
+    ) {}
 
     async addTeam(
         guildId: string,
@@ -13,17 +17,8 @@ export class TeamService {
         ownerId: string,
         creatorId: string
     ): Promise<ReturnType<DatabaseService["teams"]["create"]>> {
-        await this.database.discord_users.upsert({
-            where: { id: ownerId },
-            create: { id: ownerId },
-            update: {},
-        });
-
-        await this.database.discord_users.upsert({
-            where: { id: creatorId },
-            create: { id: creatorId },
-            update: {},
-        });
+        await this.userService.ensureDiscordUserExists(ownerId);
+        await this.userService.ensureDiscordUserExists(creatorId);
 
         return this.database.teams.create({
             data: {
