@@ -148,34 +148,32 @@ export class ScoreboardService implements OnModuleInit, OnModuleDestroy {
             away_team: string;
         }[]
     > {
-        const fixtures = await this.databaseService.fixtures.findMany({
+        const matches = await this.databaseService.matches.findMany({
             where: {
-                season,
-                guild_id: guildId,
+                fixtures: {
+                    guild_id: guildId,
+                    season: season,
+                },
             },
             select: {
-                id: true,
-                home_team_id: true,
-                away_team_id: true,
-                teams_fixtures_home_team_idToteams: {
-                    select: { name: true },
-                },
-                teams_fixtures_away_team_idToteams: {
-                    select: { name: true },
-                },
-                matches: {
+                home_score: true,
+                away_score: true,
+                fixtures: {
                     select: {
-                        home_score: true,
-                        away_score: true,
+                        teams_fixtures_home_team_idToteams: {
+                            select: { name: true },
+                        },
+                        teams_fixtures_away_team_idToteams: {
+                            select: { name: true },
+                        },
                     },
                 },
             },
         });
 
-        return fixtures.map((fixture) => {
-            const homeTeam = fixture.teams_fixtures_home_team_idToteams?.name || "Unknown";
-            const awayTeam = fixture.teams_fixtures_away_team_idToteams?.name || "Unknown";
-            const match = fixture.matches?.[0] || { home_score: 0, away_score: 0 };
+        return matches.map((match) => {
+            const homeTeam = match.fixtures.teams_fixtures_home_team_idToteams?.name || "Unknown";
+            const awayTeam = match.fixtures.teams_fixtures_away_team_idToteams?.name || "Unknown";
             return {
                 home_score: match.home_score ?? 0,
                 away_score: match.away_score ?? 0,
