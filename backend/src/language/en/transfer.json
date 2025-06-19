@@ -1,0 +1,13 @@
+{
+    "send-to-team": {
+        "team-not-found": "Team not found. Please ensure the team exists.",
+        "error": "An error occurred while sending the transfer request. {{ error }}",
+        "success": "Transfer request sent successfully to team {{ teamName }}.",
+        "notification": "User {{ user }} has sent a transfer request to your team {{ team }} in the guild {{ guild }}.\nPlaytime: {{ playtime }}\nPositions: {{ positions }}\nComment: {{ comment }}",
+        "unknown-team": "Unknown team",
+        "unknown-guild": "Unknown guild",
+        "no-playtime": "Not provided",
+        "no-positions": "Not provided",
+        "no-comment": "No comment provided"
+    }
+}
