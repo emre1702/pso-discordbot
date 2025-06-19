@@ -1,7 +1,6 @@
 import { MatchService } from "@backend/match/match.service";
 import { isNoActiveSeasonError } from "@backend/match/no-active-season.error";
 import { isNoFixtureFoundError } from "@backend/match/no-fixture-found.error";
-import { TeamService } from "@backend/team/team.service";
 import getTFunction from "@backend/utils/get-t-function.util";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { resolveKey } from "@sapphire/plugin-i18next";
@@ -174,24 +173,12 @@ export class MatchCommand extends Subcommand {
                 return;
             }
 
-            const teamService = this.container.moduleRef.get(TeamService, { strict: false });
-            const homeTeamId = await teamService.getTeamIdByName(interaction.guildId!, homeRole.name);
-            if (!homeTeamId) {
-                await interaction.editReply(await resolveKey(interaction, "match:create:team-not-found", { teamName: homeRole.name }));
-                return;
-            }
-            const awayTeamId = await teamService.getTeamIdByName(interaction.guildId!, awayRole.name);
-            if (!awayTeamId) {
-                await interaction.editReply(await resolveKey(interaction, "match:create:team-not-found", { teamName: awayRole.name }));
-                return;
-            }
-
             const homeScore = interaction.options.getInteger("home_score", true);
             const awayScore = interaction.options.getInteger("away_score", true);
             const season = interaction.options.getInteger("season");
             await this.matchService.addMatch(
-                homeTeamId,
-                awayTeamId,
+                homeRole.id,
+                awayRole.id,
                 homeScore,
                 awayScore,
                 interaction.guildId!,
@@ -218,17 +205,11 @@ export class MatchCommand extends Subcommand {
             await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
 
             const teamRole = interaction.options.getRole("team", true);
-            const teamService = this.container.moduleRef.get(TeamService, { strict: false });
-            const teamId = await teamService.getTeamIdByName(interaction.guildId!, teamRole.name);
-            if (!teamId) {
-                await interaction.editReply(await resolveKey(interaction, "match:list:team-not-found", { teamName: teamRole.name }));
-                return;
-            }
 
             const season = interaction.options.getInteger("season");
             const order = interaction.options.getString("order") as "asc" | "desc" | null;
             const amount = interaction.options.getInteger("amount");
-            const matches = await this.matchService.getMatchesForList(teamId, season, order, amount);
+            const matches = await this.matchService.getMatchesForList(teamRole.id, season, order, amount);
 
             const content = matches.reduce(
                 (currContent, match) =>
@@ -253,27 +234,14 @@ export class MatchCommand extends Subcommand {
 
         const homeTeamRole = interaction.options.getRole("home_team");
         const awayTeamRole = interaction.options.getRole("away_team");
-        const teamService = this.container.moduleRef.get(TeamService, { strict: false });
 
-        const homeTeamId = homeTeamRole ? await teamService.getTeamIdByName(interaction.guildId!, homeTeamRole.name) : undefined;
-        if (homeTeamRole && !homeTeamId) {
-            await interaction.editReply(tFunction("match:delete:team-not-found", { teamName: homeTeamRole.name }));
-            return;
-        }
-
-        const awayTeamId = awayTeamRole ? await teamService.getTeamIdByName(interaction.guildId!, awayTeamRole.name) : undefined;
-        if (awayTeamRole && !awayTeamId) {
-            await interaction.editReply(tFunction("match:delete:team-not-found", { teamName: awayTeamRole.name }));
-            return;
-        }
-
-        if (homeTeamId && awayTeamId && homeTeamId === awayTeamId) {
+        if (homeTeamRole && homeTeamRole.id === awayTeamRole?.id) {
             await interaction.editReply(tFunction("match:delete:same-teams"));
             return;
         }
 
         const season = interaction.options.getInteger("season");
-        const result = await this.matchService.deleteMatches(interaction.guildId!, homeTeamId, awayTeamId, season);
+        const result = await this.matchService.deleteMatches(interaction.guildId!, homeTeamRole?.id, awayTeamRole?.id, season);
 
         if (result.count === 0) {
             await interaction.editReply(tFunction("match:delete:no-matches-found"));

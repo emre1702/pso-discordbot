@@ -13,12 +13,4 @@ export class RoleService {
             reason: "Role created for team",
         });
     }
-
-    async deleteRoleByName(roleManager: RoleManager, name: string): Promise<void> {
-        const role = await roleManager.fetch().then((roles) => roles.find((r) => r.name === name));
-        if (!role) {
-            return Promise.resolve();
-        }
-        await role.delete("Team got deleted");
-    }
 }
