@@ -1,7 +1,7 @@
 import { DatabaseService } from "@backend/database/database.service";
 import { UserService } from "@backend/user/user.service";
 import { Injectable } from "@nestjs/common";
-import { Prisma, teams } from "@prisma/client";
+import { Prisma, team_role, teams } from "@prisma/client";
 
 @Injectable()
 export class TeamService {
@@ -51,6 +51,19 @@ export class TeamService {
             .then((team) => team?.id);
     }
 
+    getTeamNameById(teamId: string): Promise<string | null> {
+        return this.database.teams
+            .findUnique({
+                where: {
+                    id: teamId,
+                },
+                select: {
+                    name: true,
+                },
+            })
+            .then((team) => team?.name ?? null);
+    }
+
     getTeamByNameOrShortName(guildId: string, name: string, shortName: string): Promise<teams | null> {
         return this.database.teams.findFirst({
             where: {
@@ -71,5 +84,19 @@ export class TeamService {
                 guild_id: { equals: guildId, mode: "insensitive" },
             },
         });
+    }
+
+    getTeamCaptainIds(teamId: string): Promise<string[]> {
+        return this.database.team_roles
+            .findMany({
+                where: {
+                    team_id: teamId,
+                    OR: [{ role: team_role.Captain }, { role: team_role.Co_Captain }],
+                },
+                select: {
+                    user_id: true,
+                },
+            })
+            .then((roles) => roles.map((role) => role.user_id));
     }
 }
