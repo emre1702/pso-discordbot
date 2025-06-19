@@ -50,4 +50,19 @@ export class TeamRoleService {
             })
             .then((role) => role?.role || null);
     }
+
+    getTeamIdAndRole(userId: string, guildId: string): Promise<{ team_id: string; role: team_role | null } | null> {
+        return this.database.team_roles.findFirst({
+            where: {
+                user_id: userId,
+                teams: {
+                    guild_id: guildId,
+                },
+            },
+            select: {
+                team_id: true,
+                role: true,
+            },
+        });
+    }
 }

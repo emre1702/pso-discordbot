@@ -73,7 +73,7 @@ export class TransferRequestCommand extends Subcommand {
             const playtime = interaction.options.getNumber("playtime");
             const positions = interaction.options.getString("positions");
             const comment = interaction.options.getString("comment");
-            await this.transferService.createTransferRequestToTeam(interaction.user.id, interaction.guildId!, teamRole.name, {
+            await this.transferService.createTransferRequestToTeam(interaction.user.id, interaction.guildId!, teamRole.id, {
                 playtime,
                 positions,
                 comment,

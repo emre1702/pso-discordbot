@@ -9,5 +9,13 @@
         "no-playtime": "Not provided",
         "no-positions": "Not provided",
         "no-comment": "No comment provided"
+    },
+    "respond-to-team-request": {
+        "not-in-a-team": "You are not in a team.",
+        "not-a-captain-or-co-captain": "You are not a captain or co-captain of the team.",
+        "request-not-found": "The transfer request was not found.",
+        "you-have-accepted": "You have accepted the transfer request from {{ user }}.",
+        "accepted": "**{{ user }}** has accepted your transfer request in server **{{ guildName }}** for team **{{ teamName }}**.",
+        "rejected": "**{{ user }}** has rejected your transfer request in server **{{ guildName }}** for team **{{ teamName }}**."
     }
 }

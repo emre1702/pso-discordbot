@@ -1,7 +1,10 @@
 import { DatabaseService } from "@backend/database/database.service";
 import { UserService } from "@backend/user/user.service";
+import getTFunction from "@backend/utils/get-t-function.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, teams } from "@prisma/client";
+import { container } from "@sapphire/framework";
+import { TFunction } from "@sapphire/plugin-i18next";
 
 @Injectable()
 export class TeamService {
@@ -76,17 +79,62 @@ export class TeamService {
         });
     }
 
-    getTeamCaptainIds(teamId: string): Promise<string[]> {
+    getTeamCaptainIds(teamId: string, includeCoCaptains = true): Promise<string[]> {
         return this.database.team_roles
             .findMany({
                 where: {
                     team_id: teamId,
-                    OR: [{ role: team_role.Captain }, { role: team_role.Co_Captain }],
+                    role: {
+                        in: includeCoCaptains ? [team_role.Captain, team_role.Co_Captain] : [team_role.Captain],
+                    },
                 },
                 select: {
                     user_id: true,
                 },
             })
             .then((roles) => roles.map((role) => role.user_id));
+    }
+
+    getTeamExists(teamId: string): Promise<boolean> {
+        return this.database.teams
+            .findUnique({
+                where: {
+                    id: teamId,
+                },
+            })
+            .then((team) => team !== null);
+    }
+
+    async sendMessageToTeamCaptains(
+        teamId: string,
+        messageKey: string,
+        messageArgs?: { [key: string]: (func: TFunction<"translation", unknown>) => string },
+        includeCoCaptains = true
+    ): Promise<void> {
+        const getTeamCaptainIds = await this.getTeamCaptainIds(teamId, includeCoCaptains);
+        if (!getTeamCaptainIds.length) {
+            return;
+        }
+
+        for (const captainId of getTeamCaptainIds) {
+            const tFunction = await getTFunction({ userId: captainId });
+
+            const message = tFunction(
+                messageKey,
+                messageArgs
+                    ? Object.entries(messageArgs).reduce(
+                          (acc, [key, value]) => {
+                              acc[key] = value(tFunction);
+                              return acc;
+                          },
+                          {} as { [key: string]: string }
+                      )
+                    : {}
+            );
+
+            // Send the notification to the captain
+            const captainUser = await container.client.users.fetch(captainId);
+            await captainUser.send(message);
+        }
     }
 }
