@@ -1,12 +1,13 @@
 import { DatabaseService } from "@backend/database/database.service";
 import { Injectable } from "@nestjs/common";
-import { Prisma, teams } from "@prisma/client";
+import { teams } from "@prisma/client";
 
 @Injectable()
 export class TeamService {
     constructor(private readonly database: DatabaseService) {}
 
     async addTeam(
+        roleId: string,
         guildId: string,
         name: string,
         shortName: string,
@@ -27,6 +28,7 @@ export class TeamService {
 
         return this.database.teams.create({
             data: {
+                id: roleId,
                 guild_id: guildId,
                 name,
                 short_name: shortName,
@@ -42,20 +44,6 @@ export class TeamService {
         });
     }
 
-    getTeamIdByName(guildId: string, name: string): Promise<string | undefined> {
-        return this.database.teams
-            .findFirst({
-                where: {
-                    guild_id: guildId,
-                    name: { equals: name, mode: "insensitive" },
-                },
-                select: {
-                    id: true,
-                },
-            })
-            .then((team) => team?.id);
-    }
-
     getTeamByNameOrShortName(guildId: string, name: string, shortName: string): Promise<teams | null> {
         return this.database.teams.findFirst({
             where: {
@@ -69,11 +57,13 @@ export class TeamService {
         });
     }
 
-    deleteTeamByName(guildId: string, name: string): Prisma.PrismaPromise<Prisma.BatchPayload> {
-        return this.database.teams.deleteMany({
+    deleteTeam(teamId: string): Promise<{ name: string } | null> {
+        return this.database.teams.delete({
             where: {
-                name: { equals: name, mode: "insensitive" },
-                guild_id: { equals: guildId, mode: "insensitive" },
+                id: teamId,
+            },
+            select: {
+                name: true,
             },
         });
     }

@@ -1,4 +1,3 @@
-import { RoleService } from "@backend/discord/role/role.service";
 import { TeamService } from "@backend/team/team.service";
 import { Command, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { resolveKey } from "@sapphire/plugin-i18next";
@@ -21,10 +20,10 @@ export class DeleteTeamCommand extends Command {
             builder //
                 .setName(this.name)
                 .setDescription(this.description)
-                .addStringOption((option) =>
+                .addRoleOption((option) =>
                     option //
-                        .setName("team-name")
-                        .setDescription("The name of the team to delete")
+                        .setName("team-role")
+                        .setDescription("The role of the team to delete")
                         .setRequired(true)
                 )
                 .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
@@ -32,23 +31,24 @@ export class DeleteTeamCommand extends Command {
     }
 
     async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
-        const teamName = interaction.options.getString("team-name", true);
+        const teamRole = interaction.options.getRole("team-role", true);
         const teamService = this.container.moduleRef.get(TeamService, { strict: false });
 
         try {
-            const result = await teamService.deleteTeamByName(interaction.guildId!, teamName);
+            const result = await teamService.deleteTeam(teamRole.id);
 
-            if (result.count === 0) {
-                await interaction.reply(await resolveKey(interaction, "team:delete:not-found", { teamName }));
+            if (!result) {
+                await interaction.reply(await resolveKey(interaction, "team:delete:not-found", { teamName: teamRole.name }));
                 return;
             }
-            await interaction.reply(await resolveKey(interaction, "team:delete:success", { teamName }));
+            await interaction.reply(await resolveKey(interaction, "team:delete:success", { teamName: result.name }));
         } catch (error) {
             this.container.nestLogger.error(`Failed to delete team: ${error}`);
-            await interaction.reply(await resolveKey(interaction, "team:delete:error", { error: error instanceof Error ? error.message : error }));
+            await interaction.reply(
+                await resolveKey(interaction, "team:delete:error", { error: error instanceof Error ? error.message : error })
+            );
         }
 
-        const roleService = this.container.moduleRef.get(RoleService, { strict: false });
-        await roleService.deleteRoleByName(interaction.guild!.roles, teamName);
+        await interaction.guild!.roles.delete(teamRole.id, "Team deleted by command");
     }
 }

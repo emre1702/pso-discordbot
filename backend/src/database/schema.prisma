@@ -9,27 +9,31 @@ datasource db {
 }
 
 model discord_users {
-  id                                    String       @id(map: "discord-user_pkey")
-  created_at                            DateTime     @default(now()) @db.Timestamptz(6)
+  id                                    String                   @id(map: "discord-user_pkey")
+  created_at                            DateTime                 @default(now()) @db.Timestamptz(6)
   language                              language?
+  fixtures                              fixtures[]
+  matches                               matches[]
   team_roles                            team_roles[]
-  teams_teams_created_byTodiscord_users teams[]      @relation("teams_created_byTodiscord_users")
-  teams_teams_ownerTodiscord_users      teams[]      @relation("teams_ownerTodiscord_users")
+  team_transfer_requests                team_transfer_requests[]
+  teams_teams_created_byTodiscord_users teams[]                  @relation("teams_created_byTodiscord_users")
+  teams_teams_ownerTodiscord_users      teams[]                  @relation("teams_ownerTodiscord_users")
 
   @@map("discord-users")
 }
 
 model guilds {
-  id             String    @id
-  joined_at      DateTime  @default(now()) @db.Timestamptz(6)
-  last_joined_at DateTime  @default(now()) @db.Timestamptz(6)
-  matches        matches[]
-  seasons        seasons[]
-  teams          teams[]
+  id                     String                   @id
+  joined_at              DateTime                 @default(now()) @db.Timestamptz(6)
+  last_joined_at         DateTime                 @default(now()) @db.Timestamptz(6)
+  fixtures               fixtures[]
+  seasons                seasons[]
+  team_transfer_requests team_transfer_requests[]
+  teams                  teams[]
 }
 
 model team_roles {
-  team_id       String        @db.Uuid
+  team_id       String
   user_id       String
   created_at    DateTime      @default(now()) @db.Timestamptz(6)
   role          team_role?    @default(Player)
@@ -41,49 +45,46 @@ model team_roles {
 }
 
 model teams {
-  id                                            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                                            String                   @id
   name                                          String
   short_name                                    String
-  created_at                                    DateTime       @default(now()) @db.Timestamptz(6)
-  created_by                                    String?        @default("NULL")
-  owner                                         String?        @default("NULL")
+  created_at                                    DateTime                 @default(now()) @db.Timestamptz(6)
+  created_by                                    String?                  @default("NULL")
+  owner                                         String?                  @default("NULL")
   guild_id                                      String?
-  matches_matches_away_team_idToteams           matches[]      @relation("matches_away_team_idToteams")
-  matches_matches_home_team_idToteams           matches[]      @relation("matches_home_team_idToteams")
+  fixtures_fixtures_away_team_idToteams         fixtures[]               @relation("fixtures_away_team_idToteams")
+  fixtures_fixtures_home_team_idToteams         fixtures[]               @relation("fixtures_home_team_idToteams")
   seasons                                       seasons[]
   team_roles                                    team_roles[]
-  discord_users_teams_created_byTodiscord_users discord_users? @relation("teams_created_byTodiscord_users", fields: [created_by], references: [id])
-  guilds                                        guilds?        @relation(fields: [guild_id], references: [id], onDelete: Cascade)
-  discord_users_teams_ownerTodiscord_users      discord_users? @relation("teams_ownerTodiscord_users", fields: [owner], references: [id])
+  team_transfer_requests                        team_transfer_requests[]
+  discord_users_teams_created_byTodiscord_users discord_users?           @relation("teams_created_byTodiscord_users", fields: [created_by], references: [id])
+  guilds                                        guilds?                  @relation(fields: [guild_id], references: [id], onDelete: Cascade)
+  discord_users_teams_ownerTodiscord_users      discord_users?           @relation("teams_ownerTodiscord_users", fields: [owner], references: [id])
 }
 
 model matches {
-  id                                BigInt   @id @default(autoincrement())
-  created_at                        DateTime @default(now()) @db.Timestamptz(6)
-  home_team_id                      String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  away_team_id                      String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  home_score                        Int?     @db.SmallInt
-  away_score                        Int?     @db.SmallInt
-  season_id                         String?  @db.Uuid
-  guild_id                          String
-  teams_matches_away_team_idToteams teams?   @relation("matches_away_team_idToteams", fields: [away_team_id], references: [id])
-  guilds                            guilds   @relation(fields: [guild_id], references: [id], onDelete: Cascade)
-  teams_matches_home_team_idToteams teams?   @relation("matches_home_team_idToteams", fields: [home_team_id], references: [id])
-  seasons                           seasons? @relation(fields: [season_id], references: [id])
+  created_at    DateTime       @default(now()) @db.Timestamptz(6)
+  home_score    Int            @db.SmallInt
+  away_score    Int            @db.SmallInt
+  fixture_id    String         @id @db.Uuid
+  creator_id    String?
+  discord_users discord_users? @relation(fields: [creator_id], references: [id])
+  fixtures      fixtures       @relation(fields: [fixture_id], references: [id], onDelete: Cascade)
 }
 
 model seasons {
-  season             Int       @unique @db.SmallInt
-  from_date          DateTime? @db.Timestamptz(6)
-  to_date            DateTime? @db.Timestamptz(6)
-  champion_team_id   String?   @db.Uuid
+  season             Int        @db.SmallInt
+  from_date          DateTime   @db.Timestamptz(6)
+  to_date            DateTime   @db.Timestamptz(6)
+  champion_team_id   String?
   champion_team_name String?
-  created_at         DateTime  @default(now()) @db.Timestamptz(6)
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at         DateTime   @default(now()) @db.Timestamptz(6)
   guild_id           String
-  matches            matches[]
-  teams              teams?    @relation(fields: [champion_team_id], references: [id])
-  guilds             guilds    @relation(fields: [guild_id], references: [id], onDelete: Cascade)
+  fixtures           fixtures[]
+  teams              teams?     @relation(fields: [champion_team_id], references: [id])
+  guilds             guilds     @relation(fields: [guild_id], references: [id], onDelete: Cascade)
+
+  @@id([season, guild_id])
 }
 
 model guild_settings {
@@ -94,6 +95,42 @@ model guild_settings {
 
   @@id([guild_id, setting])
   @@map("guild-settings")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fixtures {
+  id                                 String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  guild_id                           String         @default("")
+  season                             Int            @db.SmallInt
+  match_time                         DateTime       @db.Timestamptz(6)
+  home_team_id                       String?
+  away_team_id                       String?
+  week                               Int            @db.SmallInt
+  creator_id                         String?        @default("")
+  teams_fixtures_away_team_idToteams teams?         @relation("fixtures_away_team_idToteams", fields: [away_team_id], references: [id])
+  discord_users                      discord_users? @relation(fields: [creator_id], references: [id])
+  guilds                             guilds         @relation(fields: [guild_id], references: [id], onDelete: Cascade)
+  seasons                            seasons        @relation(fields: [guild_id, season], references: [guild_id, season], onDelete: Cascade)
+  teams_fixtures_home_team_idToteams teams?         @relation("fixtures_home_team_idToteams", fields: [home_team_id], references: [id])
+  matches                            matches?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model team_transfer_requests {
+  id            String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at    DateTime                @default(now()) @db.Timestamptz(6)
+  guild_id      String
+  user_id       String
+  team_id       String
+  playtime      Int?                    @db.SmallInt
+  positions     String?
+  comment       String?
+  status        transfer_request_status @default(open)
+  guilds        guilds                  @relation(fields: [guild_id], references: [id], onDelete: Cascade)
+  teams         teams                   @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  discord_users discord_users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("team-transfer-requests")
 }
 
 enum language {
@@ -110,6 +147,15 @@ enum team_role {
 enum guild_setting {
   language
   scoreboard_channel @map("scoreboard-channel")
+  fixture_channel    @map("fixture-channel")
 
   @@map("guild-setting")
+}
+
+enum transfer_request_status {
+  accepted
+  rejected
+  open
+
+  @@map("transfer-request-status")
 }

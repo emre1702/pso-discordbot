@@ -80,36 +80,40 @@ export class CreateTeamCommand extends Command {
             return;
         }
 
-        let team: Awaited<ReturnType<TeamService["addTeam"]>>;
-        try {
-            team = await teamService.addTeam(interaction.guildId!, teamName, shortName, owner.id, interaction.user.id);
-            await interaction.followUp(await resolveKey(interaction, "team:create:success", { teamName: team.name }));
-        } catch (error) {
-            this.container.nestLogger.error(`Failed to create team: ${error}`);
-            await interaction.followUp(await resolveKey(interaction, "team:create:error", { error: error instanceof Error ? error.message : "Unknown error" }));
-            return;
-        }
-
-        const alreadyCreatedRole = (await interaction.guild!.roles.fetch()).find((role) => role.name.toLowerCase() === team.name.toLowerCase());
-        if (alreadyCreatedRole) {
-            await interaction.followUp(await resolveKey(interaction, "role:create:exists", { roleName: alreadyCreatedRole.name }));
-            return;
-        }
-
         if (icon && interaction.guild!.premiumTier < GuildPremiumTier.Tier2) {
             await interaction.followUp(await resolveKey(interaction, "role:create:icon-requirement"));
             icon = null; // Reset icon if the guild does not meet the requirements
         }
 
-        try {
-            const role = await roleService.createTeamRole(interaction.guild!.roles, team.name, color, icon);
-            await interaction.followUp(await resolveKey(interaction, "role:create:success", { roleName: role.name }));
+        let role = (await interaction.guild!.roles.fetch()).find((role) => role.name.toLowerCase() === team.name.toLowerCase());
 
-            // Assign the role to the team owner
-            await interaction.guild!.members.fetch(owner.id).then((member) => member.roles.add(role, "Owner of the team " + team.name));
+        if (!role) {
+            try {
+                role = await roleService.createTeamRole(interaction.guild!.roles, teamName, color, icon);
+                await interaction.followUp(await resolveKey(interaction, "role:create:success", { roleName: role.name }));
+
+                // Assign the role to the team owner
+                await interaction
+                    .guild!.members.fetch(owner.id)
+                    .then((member) => member.roles.add(role!, "Owner of the team " + team.name));
+            } catch (error) {
+                this.container.nestLogger.error(`Failed to create role for team: ${error}`);
+                await interaction.followUp(
+                    await resolveKey(interaction, "role:create:error", { error: error instanceof Error ? error.message : "Unknown error" })
+                );
+                return;
+            }
+        }
+
+        let team: Awaited<ReturnType<TeamService["addTeam"]>>;
+        try {
+            team = await teamService.addTeam(role.id!, interaction.guildId!, teamName, shortName, owner.id, interaction.user.id);
+            await interaction.followUp(await resolveKey(interaction, "team:create:success", { teamName: team.name }));
         } catch (error) {
-            this.container.nestLogger.error(`Failed to create role for team: ${error}`);
-            await interaction.followUp(await resolveKey(interaction, "role:create:error", { error: error instanceof Error ? error.message : "Unknown error" }));
+            this.container.nestLogger.error(`Failed to create team: ${error}`);
+            await interaction.followUp(
+                await resolveKey(interaction, "team:create:error", { error: error instanceof Error ? error.message : "Unknown error" })
+            );
             return;
         }
     }
