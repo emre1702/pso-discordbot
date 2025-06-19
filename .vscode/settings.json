@@ -11,5 +11,8 @@
         "source.fixAll": "always"
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "prettier.prettierPath": "./node_modules/prettier"
+    "prettier.prettierPath": "./node_modules/prettier",
+    "search.exclude": {
+        "**/node_modules": true
+    }
 }
