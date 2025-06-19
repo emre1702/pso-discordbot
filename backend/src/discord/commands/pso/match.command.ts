@@ -2,8 +2,9 @@ import { MatchService } from "@backend/match/match.service";
 import { isNoActiveSeasonError } from "@backend/match/no-active-season.error";
 import { isNoFixtureFoundError } from "@backend/match/no-fixture-found.error";
 import { TeamService } from "@backend/team/team.service";
+import getTFunction from "@backend/utils/get-t-function.util";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
-import { fetchT, resolveKey } from "@sapphire/plugin-i18next";
+import { resolveKey } from "@sapphire/plugin-i18next";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { InteractionContextType, MessageFlags, MessagePayload, PermissionFlagsBits } from "discord.js";
 
@@ -248,7 +249,7 @@ export class MatchCommand extends Subcommand {
     async chatInputDeleteRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
         const showToPublic = interaction.options.getShowToPublic();
         await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
-        const tFunction = await fetchT(interaction);
+        const tFunction = await getTFunction(interaction);
 
         const homeTeamRole = interaction.options.getRole("home_team");
         const awayTeamRole = interaction.options.getRole("away_team");

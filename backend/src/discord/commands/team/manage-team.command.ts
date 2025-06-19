@@ -1,7 +1,8 @@
 import { RoleService } from "@backend/discord/role/role.service";
 import { TeamService } from "@backend/team/team.service";
+import getTFunction from "@backend/utils/get-t-function.util";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
-import { fetchT, resolveKey } from "@sapphire/plugin-i18next";
+import { resolveKey } from "@sapphire/plugin-i18next";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { ColorResolvable, GuildPremiumTier, InteractionContextType, MessageFlags, PermissionFlagsBits } from "discord.js";
 
@@ -18,6 +19,12 @@ export class ManageTeamCommand extends Subcommand {
                 {
                     name: "create",
                     chatInputRun: "chatInputCreateRun",
+                    requiredUserPermissions: [PermissionFlagsBits.ManageRoles],
+                    requiredClientPermissions: [PermissionFlagsBits.ManageRoles],
+                },
+                {
+                    name: "delete",
+                    chatInputRun: "chatInputDeleteRun",
                     requiredUserPermissions: [PermissionFlagsBits.ManageRoles],
                     requiredClientPermissions: [PermissionFlagsBits.ManageRoles],
                 },
@@ -158,7 +165,7 @@ export class ManageTeamCommand extends Subcommand {
     async chatInputDeleteRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
         const showToPublic = interaction.options.getShowToPublic();
         await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
-        const tFunction = await fetchT(interaction);
+        const tFunction = await getTFunction(interaction);
 
         const teamRole = interaction.options.getRole("team", true);
         const teamService = this.container.moduleRef.get(TeamService, { strict: false });

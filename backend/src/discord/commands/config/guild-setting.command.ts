@@ -1,8 +1,8 @@
 import { GuildSettingService } from "@backend/setting/guild-setting.service";
 import guildSettingsRecord from "@backend/setting/guild-settings";
+import getTFunction from "@backend/utils/get-t-function.util";
 import { guild_setting } from "@prisma/client";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
-import { fetchT } from "@sapphire/plugin-i18next";
 import { Subcommand, SubcommandMappingGroup } from "@sapphire/plugin-subcommands";
 import { APIApplicationCommandOptionChoice, InteractionContextType, MessageFlags, PermissionFlagsBits } from "discord.js";
 
@@ -123,7 +123,7 @@ export class ServerSettingCommand extends Subcommand {
         await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
 
         const guildSettings = await this.guildSettingService.getAll(interaction.guildId!);
-        const tFunction = await fetchT(interaction);
+        const tFunction = await getTFunction(interaction);
 
         const settingsList = Object.entries(guildSettings)
             .map(([name, setting]) => `${name}: ${setting ?? tFunction("config:guild-setting:not-set")}`)
@@ -136,7 +136,7 @@ export class ServerSettingCommand extends Subcommand {
         const showToPublic = interaction.options.getShowToPublic();
         await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
 
-        const tFunction = await fetchT(interaction);
+        const tFunction = await getTFunction(interaction);
 
         const key = interaction.options.getString("key", true);
         const setting = this.guildSettingService.getAllConfigs()[key] as (typeof guildSettingsRecord)[guild_setting] | undefined;
@@ -153,7 +153,7 @@ export class ServerSettingCommand extends Subcommand {
 
     async chatInputSetRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
         const key = interaction.options.getSubcommand(true);
-        const tFunction = await fetchT(interaction);
+        const tFunction = await getTFunction(interaction);
 
         try {
             const showToPublic = interaction.options.getShowToPublic();

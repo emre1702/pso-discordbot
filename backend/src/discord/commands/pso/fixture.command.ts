@@ -1,6 +1,6 @@
 import { FixtureService } from "@backend/fixture/fixture.service";
+import getTFunction from "@backend/utils/get-t-function.util";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
-import { fetchT } from "@sapphire/plugin-i18next";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { InteractionContextType, MessageFlags, PermissionFlagsBits } from "discord.js";
 
@@ -86,7 +86,7 @@ export class FixtureCommand extends Subcommand {
     }
 
     async chatInputCreateRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        const tFunction = await fetchT(interaction);
+        const tFunction = await getTFunction(interaction);
         const showToPublic = interaction.options.getShowToPublic();
         await interaction.deferReply({ flags: showToPublic ? undefined : MessageFlags.Ephemeral });
 

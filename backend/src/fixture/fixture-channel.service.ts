@@ -1,11 +1,11 @@
 import { DatabaseService } from "@backend/database/database.service";
 import { SeasonService } from "@backend/season/season.service";
 import { GuildSettingService } from "@backend/setting/guild-setting.service";
+import getTFunction from "@backend/utils/get-t-function.util";
 import { splitMessageByLength } from "@backend/utils/split-message-by-length.util";
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { guild_setting } from "@prisma/client";
 import { container } from "@sapphire/pieces";
-import { fetchT } from "@sapphire/plugin-i18next";
 import { bold, GuildBasedChannel, GuildChannel, Role, roleMention, TextBasedChannel, time, TimestampStyles } from "discord.js";
 import { filter, Subject, takeUntil } from "rxjs";
 
@@ -99,7 +99,7 @@ export class FixtureChannelService implements OnModuleInit, OnModuleDestroy {
             const guildLanguage = (await this.guildSettingService.get(guildId, guild_setting.language)) || "en";
             let currentDay = 0;
             let messageContent = "";
-            const tFunction = await fetchT(guild);
+            const tFunction = await getTFunction(guild);
             for (const fixture of fixtures) {
                 const day = fixture.match_time.getUTCDate();
                 let homeTeam = fixture.teams_fixtures_home_team_idToteams?.name;

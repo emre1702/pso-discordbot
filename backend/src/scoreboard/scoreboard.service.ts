@@ -3,12 +3,12 @@ import { MatchService } from "@backend/match/match.service";
 import { SeasonService } from "@backend/season/season.service";
 import { GuildSettingService } from "@backend/setting/guild-setting.service";
 import { getLastMessage } from "@backend/utils/get-last-message.util";
+import getTFunction from "@backend/utils/get-t-function.util";
 import { TableBuilder } from "@backend/utils/table-builder.util";
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { guild_setting } from "@prisma/client";
 import { container } from "@sapphire/framework";
-import { fetchT } from "@sapphire/plugin-i18next";
-import { Guild, GuildBasedChannel, MessageFlags } from "discord.js";
+import { GuildBasedChannel, MessageFlags } from "discord.js";
 import { filter, merge, Subject, takeUntil } from "rxjs";
 import { ScoreboardRowModel } from "./scoreboard-row.model";
 
@@ -90,8 +90,7 @@ export class ScoreboardService implements OnModuleInit, OnModuleDestroy {
     }
 
     private async createScoreboardMessageContent(guildId: string, season?: number): Promise<string | null> {
-        const interaction = container.client.guilds.resolve(guildId);
-        const tFunction = await fetchT(interaction as Guild);
+        const tFunction = await getTFunction({ guildId });
 
         if (!season) {
             const lastSeason = await this.seasonService.getLastSeason(guildId);
