@@ -115,6 +115,7 @@ export class ToTeamTransferRequestService {
         }
 
         //TODO: In command send responder message "transfer:respond-to-team-request:you-have-accepted"
+        //TODO: If accepted, add user to team and send a message to the transfer channel
 
         await this.notifyRequesterAboutResponse(requesterId, response, teamIdAndRole.team_id, guildId, responderId);
     }
