@@ -6,6 +6,7 @@ import { ChatInputCommandInteraction, Guild } from "discord.js";
 function getTFunction(guild: Guild): Promise<TFunction<"translation", undefined>>;
 function getTFunction(argument: { guildId: string }): Promise<TFunction<"translation", undefined>>;
 function getTFunction(argument: { userId: string }): Promise<TFunction<"translation", undefined>>;
+function getTFunction(argument: { userId: string; guildId: string }): Promise<TFunction<"translation", undefined>>;
 function getTFunction(interaction: ChatInputCommandInteraction): Promise<TFunction<"translation", undefined>>;
 function getTFunction(
     argument: { guildId: string } | { userId: string } | Guild | ChatInputCommandInteraction
@@ -16,11 +17,16 @@ function getTFunction(
     if (argument instanceof ChatInputCommandInteraction) {
         return fetchT(argument);
     }
-    if (typeof argument === "object" && "guildId" in argument) {
-        return getTFunctionByGuildId(argument.guildId);
-    }
-    if (typeof argument === "object" && "userId" in argument) {
-        return getTFunctionByUserId(argument.userId);
+    if (typeof argument === "object") {
+        if ("userId" in argument && "guildId" in argument) {
+            return getTFunctionByUserIdWithGuildFallback(argument.userId as string, argument.guildId as string);
+        }
+        if ("guildId" in argument) {
+            return getTFunctionByGuildId(argument.guildId);
+        }
+        if ("userId" in argument) {
+            return getTFunctionByUserId(argument.userId);
+        }
     }
     return Promise.resolve(i18next.getFixedT("en"));
 }
@@ -46,6 +52,20 @@ async function getTFunctionByUserId(userId: string): Promise<TFunction<"translat
         })
         .then((user) => user?.language);
     return i18next.getFixedT(userLanguage ?? "en");
+}
+
+async function getTFunctionByUserIdWithGuildFallback(userId: string, guildId: string): Promise<TFunction<"translation", undefined>> {
+    const databaseService = container.moduleRef.get(DatabaseService, { strict: false });
+    const userLanguage = await databaseService.discord_users
+        .findUnique({
+            where: { id: userId },
+            select: { language: true },
+        })
+        .then((user) => user?.language);
+    if (userLanguage) {
+        return i18next.getFixedT(userLanguage);
+    }
+    return getTFunctionByGuildId(guildId);
 }
 
 export default getTFunction;

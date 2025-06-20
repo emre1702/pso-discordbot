@@ -3,11 +3,11 @@ import { UserModule } from "@backend/user/user.module";
 import { Module } from "@nestjs/common";
 import { TeamRoleService } from "./team-role.service";
 import { TeamService } from "./team.service";
-import { TransferService } from "./transfer.service";
+import { ToTeamTransferRequestService } from "./to-team-transfer-request.service";
 
 @Module({
-    providers: [TeamService, TeamRoleService, TransferService],
-    exports: [TeamService, TeamRoleService, TransferService],
+    providers: [TeamService, TeamRoleService, ToTeamTransferRequestService],
+    exports: [TeamService, TeamRoleService, ToTeamTransferRequestService],
     imports: [DatabaseModule, UserModule],
 })
 export class TeamModule {}

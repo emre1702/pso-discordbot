@@ -1,11 +1,11 @@
-import { TransferService } from "@backend/team/transfer.service";
+import { ToTeamTransferRequestService } from "@backend/team/to-team-transfer-request.service";
 import getTFunction from "@backend/utils/get-t-function.util";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
 
 export class TransferRequestCommand extends Subcommand {
-    private readonly transferService: TransferService;
+    private readonly transferService: ToTeamTransferRequestService;
 
     constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
         super(context, {
@@ -21,7 +21,7 @@ export class TransferRequestCommand extends Subcommand {
                 },
             ],
         });
-        this.transferService = this.container.moduleRef.get(TransferService, { strict: false });
+        this.transferService = this.container.moduleRef.get(ToTeamTransferRequestService, { strict: false });
     }
 
     override registerApplicationCommands(registry: Subcommand.Registry): void {

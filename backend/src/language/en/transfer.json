@@ -17,5 +17,11 @@
         "you-have-accepted": "You have accepted the transfer request from {{ user }}.",
         "accepted": "**{{ user }}** has accepted your transfer request in server **{{ guildName }}** for team **{{ teamName }}**.",
         "rejected": "**{{ user }}** has rejected your transfer request in server **{{ guildName }}** for team **{{ teamName }}**."
+    },
+    "send-to-user": {
+        "team-not-found": "You are not in a team.",
+        "you-are-not-allowed": "You are not allowed to send transfer requests to users.",
+        "target-user-already-in-team": "The target user is already in a team.",
+        "notification": "You have received a transfer request from **{{ requesterName }}** in server **{{ guildName }}** for team **{{ teamName }}**."
     }
 }

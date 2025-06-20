@@ -4,14 +4,14 @@ import getTFunction from "@backend/utils/get-t-function.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
-import { NotACaptainOrCoCaptainError } from "./not-a-captain-or-co-captain.error";
+import { InsufficientPermissionError } from "./insufficent-team-permission.error";
 import { TeamNotFoundError } from "./team-not-found.error";
 import { TeamRoleService } from "./team-role.service";
 import { TeamService } from "./team.service";
 import { TransferRequestNotFoundError } from "./transfer-request-not-found.error";
 
 @Injectable()
-export class TransferService {
+export class ToTeamTransferRequestService {
     constructor(
         private readonly teamService: TeamService,
         private readonly teamRoleService: TeamRoleService,
@@ -64,8 +64,9 @@ export class TransferService {
         }
         const guild = container.client.guilds.cache.get(guildId);
         const teamName = await this.teamService.getTeamNameById(teamId);
+        //TODO: Modify message so it says what to do next, e.g., accept or decline the transfer request with command xyz
         const messageKey = "transfer:send-to-team:notification";
-        const messageArgs: Parameters<TeamService["sendMessageToTeamCaptains"]>[2] = {
+        const messageArgs: Parameters<TeamService["sendMessageToTeamCaptains"]>[3] = {
             team: teamName ? (): string => teamName : (tFunc): string => tFunc("transfer:send-to-team:unknown-team"),
             guild: guild ? (): string => guild.name : (tFunc): string => tFunc("transfer:send-to-team:unknown-guild"),
             user: (): string => user.username,
@@ -73,7 +74,7 @@ export class TransferService {
             positions: positions ? (): string => positions : (tFunc): string => tFunc("transfer:send-to-team:no-positions"),
             comment: comment ? (): string => comment : (tFunc): string => tFunc("transfer:send-to-team:no-comment"),
         };
-        await this.teamService.sendMessageToTeamCaptains(teamId, messageKey, messageArgs);
+        await this.teamService.sendMessageToTeamCaptains(teamId, guildId, messageKey, messageArgs);
     }
 
     async respondToTeamTransferRequest(
@@ -82,22 +83,25 @@ export class TransferService {
         requesterId: string,
         response: Extract<transfer_request_status, "accepted" | "rejected">
     ): Promise<void> {
-        const tFunction = await getTFunction({ userId: responderId });
+        const tFunction = await getTFunction({ userId: responderId, guildId });
         const teamIdAndRole = await this.teamRoleService.getTeamIdAndRole(responderId, guildId);
         if (!teamIdAndRole) {
             throw TeamNotFoundError(tFunction("transfer:respond-to-team-request:not-in-a-team"));
         }
 
         if (teamIdAndRole.role !== team_role.Captain && teamIdAndRole.role !== team_role.Co_Captain) {
-            throw NotACaptainOrCoCaptainError(tFunction("transfer:respond-to-team-request:not-a-captain-or-co-captain"));
+            throw InsufficientPermissionError(tFunction("transfer:respond-to-team-request:not-a-captain-or-co-captain"));
         }
 
         await this.userService.ensureDiscordUserExists(requesterId);
 
+        //TODO: Delete transfer requests after 7 days, check "changed_at" field for that
+        //TODO: Add command to delete transfer requests so the teams can send new ones
         const result = await this.databaseService.team_transfer_requests.updateMany({
             where: {
                 user_id: requesterId,
                 team_id: teamIdAndRole.team_id,
+                status: transfer_request_status.open,
             },
             data: {
                 status: response,
@@ -134,7 +138,7 @@ export class TransferService {
         const responder = await container.client.users.fetch(responderId);
         const responderName = responder ? responder.username : "Unknown User";
 
-        const tFunction = await getTFunction({ userId: requesterId });
+        const tFunction = await getTFunction({ userId: requesterId, guildId });
         const messageKey =
             response === transfer_request_status.accepted
                 ? "transfer:respond-to-team-request:accepted"

@@ -107,6 +107,7 @@ export class TeamService {
 
     async sendMessageToTeamCaptains(
         teamId: string,
+        guildId: string,
         messageKey: string,
         messageArgs?: { [key: string]: (func: TFunction<"translation", unknown>) => string },
         includeCoCaptains = true
@@ -117,7 +118,7 @@ export class TeamService {
         }
 
         for (const captainId of getTeamCaptainIds) {
-            const tFunction = await getTFunction({ userId: captainId });
+            const tFunction = await getTFunction({ userId: captainId, guildId });
 
             const message = tFunction(
                 messageKey,
