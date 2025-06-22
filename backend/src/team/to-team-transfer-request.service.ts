@@ -47,6 +47,7 @@ export class ToTeamTransferRequestService {
             },
         });
         if (previousTransferRequest) {
+            //TODO Modify message so the user knows that the target user can delete the previous request so he can receive a new one
             throw TransferRequestAlreadyExistsError(tFunction("transfer:send-to-team:request-already-exists"));
         }
 
