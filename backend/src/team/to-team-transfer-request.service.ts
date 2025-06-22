@@ -5,6 +5,7 @@ import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
 import { roleMention, userMention } from "discord.js";
+import { AlreadyInATeamError } from "./already-in-a-team.error";
 import { InsufficientPermissionError } from "./insufficent-team-permission.error";
 import { TeamNotFoundError } from "./team-not-found.error";
 import { TeamRoleService } from "./team-role.service";
@@ -26,10 +27,14 @@ export class ToTeamTransferRequestService {
         teamId: string,
         args: { playtime: number | null; positions: string | null; comment: string | null }
     ): Promise<void> {
-        //TODO: Add check if user is already in a team
         //TODO: Check if request for the same team already exists
 
         const tFunction = await getTFunction({ guildId });
+        const teamIdAndRole = await this.teamRoleService.getTeamIdAndRole(userId, guildId);
+        if (teamIdAndRole) {
+            throw AlreadyInATeamError(tFunction("transfer:send-to-team:already-in-a-team"));
+        }
+
         const teamExists = await this.teamService.getTeamExists(teamId);
         if (!teamExists) {
             throw TeamNotFoundError(tFunction("transfer:send-to-team:team-not-found"));

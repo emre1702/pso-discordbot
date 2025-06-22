@@ -8,7 +8,8 @@
         "unknown-guild": "Unknown server",
         "no-playtime": "Not provided",
         "no-positions": "Not provided",
-        "no-comment": "No comment provided"
+        "no-comment": "No comment provided",
+        "already-in-a-team": "The user is already in a team."
     },
     "respond-to-team-request": {
         "not-in-a-team": "You are not in a team.",
