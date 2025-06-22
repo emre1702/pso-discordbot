@@ -111,7 +111,6 @@ export class ToTeamTransferRequestService {
 
         await this.userService.ensureDiscordUserExists(requesterId);
 
-        //TODO: Delete transfer requests after X days, check "changed_at" field for that
         //TODO: Add command to delete transfer requests so the teams can send new ones
         //TODO: Add setting "max-team-size" (or smth. like that) to prevent teams from accepting too many players
         const result = await this.databaseService.team_transfer_requests.update({
