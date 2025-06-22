@@ -5,7 +5,6 @@ import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
 import { roleMention, userMention } from "discord.js";
-import { AlreadyInATeamError } from "./errors/already-in-a-team.error";
 import { InsufficientPermissionError } from "./errors/insufficent-team-permission.error";
 import { TeamNotFoundError } from "./errors/team-not-found.error";
 import { TransferRequestAlreadyExistsError } from "./errors/transfer-request-already-exists.error";
@@ -33,11 +32,6 @@ export class ToTeamTransferRequestService {
         args: { playtime: number | null; positions: string | null; comment: string | null }
     ): Promise<void> {
         const tFunction = await getTFunction({ guildId });
-        const teamIdAndRole = await this.teamRoleService.getTeamIdAndRole(userId, guildId);
-        if (teamIdAndRole) {
-            throw AlreadyInATeamError(tFunction("transfer:send-to-team:already-in-a-team"));
-        }
-
         const previousTransferRequest = await this.databaseService.team_transfer_requests.findUnique({
             where: {
                 user_id_team_id: {
@@ -143,8 +137,14 @@ export class ToTeamTransferRequestService {
         }
 
         if (response === transfer_request_status.accepted) {
+            const previousTeamIdAndRole = await this.teamRoleService.getTeamIdAndRole(responderId, guildId);
             await this.teamRoleService.setTeamRole(teamIdAndRole.team_id, responderId, team_role.Player);
-            await this.transferChannelService.sendTransferMessage(responderId, teamIdAndRole.team_id, guildId);
+            await this.transferChannelService.sendTransferMessage(
+                responderId,
+                teamIdAndRole.team_id,
+                previousTeamIdAndRole?.team_id,
+                guildId
+            );
             await this.transferRequestSharedService.rejectAllOtherTransferRequests(responderId, teamIdAndRole.team_id);
         }
 
