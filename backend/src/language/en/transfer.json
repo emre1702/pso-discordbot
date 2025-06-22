@@ -40,8 +40,8 @@
         "error": "An error occurred while responding to the transfer request. {{ error }}"
     },
     "channel": {
-        "message-transfer": "**New transfer - {{ user }}**\n{{ oldTeam }} -> {{ newTeam }}",
-        "message-free-agent": "**New free agent - {{ user }}**\n{{ oldTeam }} -> Free Agent",
+        "message-transfer": "# Transfer - {{ user }}\n## {{ oldTeam }}  ->  {{ newTeam }}",
+        "message-free-agent": "# Free agent - {{ user }}\n## {{ oldTeam }}  ->  Free Agent",
         "free-agent": "Free Agent"
     }
 }

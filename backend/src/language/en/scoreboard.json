@@ -1,5 +1,5 @@
 {
-    "title": "**Season {{ season }} - Scoreboard**",
+    "title": "# Season {{ season }} - Scoreboard",
     "team": "Team",
     "played": "Played",
     "won": "Won",
