@@ -97,6 +97,7 @@ export class ToTeamTransferRequestService {
 
         //TODO: Delete transfer requests after 7 days, check "changed_at" field for that
         //TODO: Add command to delete transfer requests so the teams can send new ones
+        //TODO: Make PK user_id and team_id, use update instead of updateMany
         const result = await this.databaseService.team_transfer_requests.updateMany({
             where: {
                 user_id: requesterId,
@@ -115,7 +116,10 @@ export class ToTeamTransferRequestService {
         }
 
         //TODO: In command send responder message "transfer:respond-to-team-request:you-have-accepted"
-        //TODO: If accepted, add user to team and send a message to the transfer channel
+        if (response === transfer_request_status.accepted) {
+            await this.teamRoleService.setTeamRole(teamIdAndRole.team_id, responderId, team_role.Player);
+            //TODO: Send a message to the transfer channel
+        }
 
         await this.notifyRequesterAboutResponse(requesterId, response, teamIdAndRole.team_id, guildId, responderId);
     }
