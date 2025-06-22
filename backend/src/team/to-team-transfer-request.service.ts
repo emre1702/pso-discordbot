@@ -34,12 +34,12 @@ export class ToTeamTransferRequestService {
             throw AlreadyInATeamError(tFunction("transfer:send-to-team:already-in-a-team"));
         }
 
-        //TODO: Make user_id and team_id a PK in the transfer requests table and use findUnique instead of findFirst
-        const previousTransferRequest = await this.databaseService.team_transfer_requests.findFirst({
+        const previousTransferRequest = await this.databaseService.team_transfer_requests.findUnique({
             where: {
-                user_id: userId,
-                guild_id: guildId,
-                team_id: teamId,
+                user_id_team_id: {
+                    user_id: userId,
+                    team_id: teamId,
+                },
             },
         });
         if (previousTransferRequest) {
@@ -113,13 +113,14 @@ export class ToTeamTransferRequestService {
 
         await this.userService.ensureDiscordUserExists(requesterId);
 
-        //TODO: Delete transfer requests after 7 days, check "changed_at" field for that
+        //TODO: Delete transfer requests after X days, check "changed_at" field for that
         //TODO: Add command to delete transfer requests so the teams can send new ones
-        //TODO: Make PK user_id and team_id, use update instead of updateMany
-        const result = await this.databaseService.team_transfer_requests.updateMany({
+        const result = await this.databaseService.team_transfer_requests.update({
             where: {
-                user_id: requesterId,
-                team_id: teamIdAndRole.team_id,
+                user_id_team_id: {
+                    user_id: requesterId,
+                    team_id: teamIdAndRole.team_id,
+                },
                 status: transfer_request_status.open,
             },
             data: {
@@ -127,9 +128,12 @@ export class ToTeamTransferRequestService {
                 changed_by: responderId,
                 changed_at: new Date(),
             },
+            select: {
+                status: true,
+            },
         });
 
-        if (result.count === 0) {
+        if (result?.status !== response) {
             throw TransferRequestNotFoundError(tFunction("transfer:respond-to-team-request:request-not-found"));
         }
 

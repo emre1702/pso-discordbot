@@ -109,7 +109,6 @@ model team_roles {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model team_transfer_requests {
-  id                                                             String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   created_at                                                     DateTime                @default(now()) @db.Timestamptz(6)
   guild_id                                                       String
   user_id                                                        String
@@ -125,6 +124,7 @@ model team_transfer_requests {
   teams                                                          teams                   @relation(fields: [team_id], references: [id], onDelete: Cascade)
   discord_users                                                  discord_users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
+  @@id([user_id, team_id])
   @@map("team-transfer-requests")
 }
 
