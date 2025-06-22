@@ -174,12 +174,38 @@ export class ToTeamTransferRequestService {
             response === transfer_request_status.accepted
                 ? "transfer:respond-to-team-request:accepted"
                 : "transfer:respond-to-team-request:rejected";
-        requester.send(
-            tFunction(messageKey, {
-                teamName,
-                guildName: guild.name,
-                responderName: getUserMentionAndName(responder),
-            })
-        );
+        requester
+            .send(
+                tFunction(messageKey, {
+                    teamName,
+                    guildName: guild.name,
+                    responderName: getUserMentionAndName(responder),
+                })
+            )
+            .catch(() => {});
+    }
+
+    async delete(userId: string, guildId: string, teamId: string): Promise<void> {
+        const tFunction = await getTFunction({ guildId, userId });
+        const teamExists = await this.teamService.getTeamExists(teamId);
+        if (!teamExists) {
+            throw TeamNotFoundError(tFunction("transfer:to-team-transfer:delete:team-not-found"));
+        }
+
+        const transferRequest = await this.databaseService.team_transfer_requests.delete({
+            where: {
+                user_id_team_id: {
+                    user_id: userId,
+                    team_id: teamId,
+                },
+            },
+            select: {
+                user_id: true,
+            },
+        });
+
+        if (!transferRequest) {
+            throw TransferRequestNotFoundError(tFunction("transfer:to-team-transfer:delete:request-not-found"));
+        }
     }
 }

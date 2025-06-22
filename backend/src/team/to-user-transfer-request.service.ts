@@ -96,7 +96,7 @@ export class ToUserTransferRequestService {
             teamName,
             requesterName: requesterNameWithMention,
         });
-        await user.send(message);
+        await user.send(message).catch(() => {});
     }
 
     /**

@@ -135,7 +135,7 @@ export class TeamService {
 
             // Send the notification to the captain
             const captainUser = await container.client.users.fetch(captainId);
-            await captainUser.send(message);
+            await captainUser.send(message).catch(() => {});
         }
     }
 
