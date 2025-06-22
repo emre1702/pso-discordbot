@@ -5,14 +5,16 @@ import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
 import { roleMention, userMention } from "discord.js";
-import { AlreadyInATeamError } from "./already-in-a-team.error";
-import { InsufficientPermissionError } from "./insufficent-team-permission.error";
-import { TargetUserHasTeamError } from "./target-user-has-team.error";
-import { TeamNotFoundError } from "./team-not-found.error";
+import { AlreadyInATeamError } from "./errors/already-in-a-team.error";
+import { InsufficientPermissionError } from "./errors/insufficent-team-permission.error";
+import { TargetUserHasTeamError } from "./errors/target-user-has-team.error";
+import { TeamNotFoundError } from "./errors/team-not-found.error";
+import { TransferRequestAlreadyExistsError } from "./errors/transfer-request-already-exists.error";
+import { TransferRequestNotFoundError } from "./errors/transfer-request-not-found.error";
 import { TeamRoleService } from "./team-role.service";
 import { TeamService } from "./team.service";
-import { TransferRequestAlreadyExistsError } from "./transfer-request-already-exists.error";
-import { TransferRequestNotFoundError } from "./transfer-request-not-found.error";
+import { TransferChannelService } from "./transfer-channel.service";
+import { TransferRequestSharedService } from "./transfer-request-shared.service";
 
 @Injectable()
 export class ToUserTransferRequestService {
@@ -20,7 +22,9 @@ export class ToUserTransferRequestService {
         private readonly databaseService: DatabaseService,
         private readonly userService: UserService,
         private readonly teamService: TeamService,
-        private readonly teamRoleService: TeamRoleService
+        private readonly teamRoleService: TeamRoleService,
+        private readonly transferChannelService: TransferChannelService,
+        private readonly transferRequestSharedService: TransferRequestSharedService
     ) {}
 
     /**
@@ -133,7 +137,8 @@ export class ToUserTransferRequestService {
 
         if (response === transfer_request_status.accepted) {
             await this.teamRoleService.setTeamRole(teamId, userId, team_role.Player);
-            //TODO: send a message to the transfer channel
+            await this.transferChannelService.sendTransferMessage(userId, teamId, guildId);
+            await this.transferRequestSharedService.rejectAllOtherTransferRequests(userId, teamId);
         }
 
         await this.notifyTeamAboutResponse(userId, teamId, guildId, response);

@@ -36,6 +36,13 @@ const guildSettingsRecord: Record<guild_setting, SettingConfig> = {
         type: "channel",
         defaultValue: null,
     },
+    [guild_setting.transfer_channel]: {
+        setting: guild_setting.transfer_channel,
+        name: guild_setting.transfer_channel,
+        description: "The channel where transfers are posted",
+        type: "channel",
+        defaultValue: null,
+    },
 };
 
 export default guildSettingsRecord;

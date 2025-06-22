@@ -11,18 +11,18 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model discord_users {
-  id                                                                        String                   @id(map: "discord-user_pkey")
-  created_at                                                                DateTime                 @default(now()) @db.Timestamptz(6)
-  language                                                                  language?
-  fixtures                                                                  fixtures[]
-  matches                                                                   matches[]
-  team_roles                                                                team_roles[]
-  team_transfer_requests_team_transfer_requests_changed_byTodiscord_users   team_transfer_requests[] @relation("team_transfer_requests_changed_byTodiscord_users")
-  team_transfer_requests                                                    team_transfer_requests[]
-  teams_teams_created_byTodiscord_users                                     teams[]                  @relation("teams_created_byTodiscord_users")
-  teams_teams_ownerTodiscord_users                                          teams[]                  @relation("teams_ownerTodiscord_users")
-  user_transfer_requests_user_transfer_requests_requester_idTodiscord_users user_transfer_requests[] @relation("user_transfer_requests_requester_idTodiscord_users")
-  user_transfer_requests_user_transfer_requests_user_idTodiscord_users      user_transfer_requests[] @relation("user_transfer_requests_user_idTodiscord_users")
+  id                                                                             String                   @id(map: "discord-user_pkey")
+  created_at                                                                     DateTime                 @default(now()) @db.Timestamptz(6)
+  language                                                                       language?
+  fixtures                                                                       fixtures[]
+  matches                                                                        matches[]
+  team_roles                                                                     team_roles[]
+  team_transfer_requests_team_transfer_requests_status_changed_byTodiscord_users team_transfer_requests[] @relation("team_transfer_requests_status_changed_byTodiscord_users")
+  team_transfer_requests                                                         team_transfer_requests[]
+  teams_teams_created_byTodiscord_users                                          teams[]                  @relation("teams_created_byTodiscord_users")
+  teams_teams_ownerTodiscord_users                                               teams[]                  @relation("teams_ownerTodiscord_users")
+  user_transfer_requests_user_transfer_requests_requester_idTodiscord_users      user_transfer_requests[] @relation("user_transfer_requests_requester_idTodiscord_users")
+  user_transfer_requests_user_transfer_requests_user_idTodiscord_users           user_transfer_requests[] @relation("user_transfer_requests_user_idTodiscord_users")
 
   @@map("discord-users")
 }
@@ -109,20 +109,20 @@ model team_roles {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model team_transfer_requests {
-  created_at                                                     DateTime                @default(now()) @db.Timestamptz(6)
-  guild_id                                                       String
-  user_id                                                        String
-  team_id                                                        String
-  playtime                                                       Int?                    @db.SmallInt
-  positions                                                      String?
-  comment                                                        String?
-  status                                                         transfer_request_status @default(open)
-  changed_by                                                     String?
-  changed_at                                                     DateTime?               @db.Timestamptz(6)
-  discord_users_team_transfer_requests_changed_byTodiscord_users discord_users?          @relation("team_transfer_requests_changed_byTodiscord_users", fields: [changed_by], references: [id])
-  guilds                                                         guilds                  @relation(fields: [guild_id], references: [id], onDelete: Cascade)
-  teams                                                          teams                   @relation(fields: [team_id], references: [id], onDelete: Cascade)
-  discord_users                                                  discord_users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at                                                            DateTime                @default(now()) @db.Timestamptz(6)
+  guild_id                                                              String
+  user_id                                                               String
+  team_id                                                               String
+  playtime                                                              Int?                    @db.SmallInt
+  positions                                                             String?
+  comment                                                               String?
+  status                                                                transfer_request_status @default(open)
+  status_changed_by                                                     String?
+  status_changed_at                                                     DateTime?               @db.Timestamptz(6)
+  guilds                                                                guilds                  @relation(fields: [guild_id], references: [id], onDelete: Cascade)
+  discord_users_team_transfer_requests_status_changed_byTodiscord_users discord_users?          @relation("team_transfer_requests_status_changed_byTodiscord_users", fields: [status_changed_by], references: [id])
+  teams                                                                 teams                   @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  discord_users                                                         discord_users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, team_id])
   @@map("team-transfer-requests")
@@ -168,6 +168,7 @@ enum guild_setting {
   language
   scoreboard_channel @map("scoreboard-channel")
   fixture_channel    @map("fixture-channel")
+  transfer_channel   @map("transfer-channel")
 
   @@map("guild-setting")
 }
