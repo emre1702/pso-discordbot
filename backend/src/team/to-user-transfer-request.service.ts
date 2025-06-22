@@ -131,6 +131,8 @@ export class ToUserTransferRequestService {
             throw TransferRequestNotFoundError(tFunction("transfer:respond-to-user-request:request-not-found"));
         }
 
+        //TODO: Add setting "max-team-size" (or smth. like that) to prevent teams from accepting too many players
+
         if (response === transfer_request_status.accepted) {
             const previousTeamIdAndRole = await this.teamRoleService.getTeamIdAndRole(userId, guildId);
             await this.teamRoleService.setTeamRole(teamId, userId, team_role.Player);

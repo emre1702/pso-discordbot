@@ -273,4 +273,6 @@ export class FixtureService {
             })
             .then((fixtures) => fixtures.map((fixture) => fixture.id));
     }
+
+    //TODO: Add command to move a match to another date, also display it in the fixture channel
 }

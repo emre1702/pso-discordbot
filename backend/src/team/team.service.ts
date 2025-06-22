@@ -138,4 +138,7 @@ export class TeamService {
             await captainUser.send(message);
         }
     }
+
+    //TODO: Add command to list all players in a team
+    //TODO: Add command to list all teams in a guild
 }
