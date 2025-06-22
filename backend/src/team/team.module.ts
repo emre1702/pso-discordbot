@@ -1,4 +1,5 @@
 import { DatabaseModule } from "@backend/database/database.module";
+import { GuildSettingModule } from "@backend/setting/guild-setting.module";
 import { UserModule } from "@backend/user/user.module";
 import { Module } from "@nestjs/common";
 import { TeamRoleService } from "./team-role.service";
@@ -25,6 +26,6 @@ import { TransferRequestSharedService } from "./transfer-request-shared.service"
         TransferChannelService,
         TransferRequestSharedService,
     ],
-    imports: [DatabaseModule, UserModule],
+    imports: [DatabaseModule, UserModule, GuildSettingModule],
 })
 export class TeamModule {}

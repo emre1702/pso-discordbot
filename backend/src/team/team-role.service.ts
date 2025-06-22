@@ -14,7 +14,7 @@ export class TeamRoleService {
             },
         });
 
-        const result = this.database.team_roles.upsert({
+        const result = await this.database.team_roles.upsert({
             where: {
                 team_id_user_id: {
                     team_id: teamId,
@@ -38,7 +38,7 @@ export class TeamRoleService {
             },
         });
 
-        const guild = await container.client.guilds.fetch(result.teams[0].guild_id);
+        const guild = await container.client.guilds.fetch(result.teams.guild_id!);
         if (!guild) {
             return;
         }
@@ -48,11 +48,11 @@ export class TeamRoleService {
             return;
         }
 
-        if (user.roles.cache.has(role)) {
+        if (user.roles.cache.has(teamId)) {
             return;
         }
 
-        await user.roles.add(role);
+        await user.roles.add(teamId);
     }
 
     getTeamRole(teamId: string, userId: string): Promise<team_role | null> {

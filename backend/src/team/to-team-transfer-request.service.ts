@@ -1,10 +1,10 @@
 import { DatabaseService } from "@backend/database/database.service";
 import { UserService } from "@backend/user/user.service";
 import getTFunction from "@backend/utils/get-t-function.util";
+import { getUserMentionAndName } from "@backend/utils/get-user-mention-and-name.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
-import { roleMention, userMention } from "discord.js";
 import { InsufficientPermissionError } from "./errors/insufficent-team-permission.error";
 import { TeamNotFoundError } from "./errors/team-not-found.error";
 import { TransferRequestAlreadyExistsError } from "./errors/transfer-request-already-exists.error";
@@ -80,13 +80,12 @@ export class ToTeamTransferRequestService {
         }
         const guild = container.client.guilds.cache.get(guildId);
         const teamName = await this.teamService.getTeamNameById(teamId);
+        const userName = getUserMentionAndName(user);
         const messageKey = "transfer:send-to-team:notification";
         const messageArgs: Parameters<TeamService["sendMessageToTeamCaptains"]>[3] = {
-            team: teamName
-                ? (): string => `${roleMention(teamId)} (${teamName})`
-                : (tFunc): string => tFunc("transfer:send-to-team:unknown-team"),
+            team: teamName ? (): string => teamName : (tFunc): string => tFunc("transfer:send-to-team:unknown-team"),
             guild: guild ? (): string => guild.name : (tFunc): string => tFunc("transfer:send-to-team:unknown-guild"),
-            user: (): string => `${userMention(user.id)} (${user.username})`,
+            user: (): string => userName,
             playtime: playtime ? (): string => playtime.toString() : (tFunc): string => tFunc("transfer:send-to-team:no-playtime"),
             positions: positions ? (): string => positions : (tFunc): string => tFunc("transfer:send-to-team:no-positions"),
             comment: comment ? (): string => comment : (tFunc): string => tFunc("transfer:send-to-team:no-comment"),
@@ -168,7 +167,6 @@ export class ToTeamTransferRequestService {
         }
         const teamName = await this.teamService.getTeamNameById(teamId);
         const responder = await container.client.users.fetch(responderId);
-        const responderName = responder ? responder.username : "Unknown User";
 
         const tFunction = await getTFunction({ userId: requesterId, guildId });
         const messageKey =
@@ -177,9 +175,9 @@ export class ToTeamTransferRequestService {
                 : "transfer:respond-to-team-request:rejected";
         requester.send(
             tFunction(messageKey, {
-                teamName: `${roleMention(teamId)} (${teamName ?? "?"})`,
+                teamName,
                 guildName: guild.name,
-                responderName: `${userMention(responderId)} (${responderName})`,
+                responderName: getUserMentionAndName(responder),
             })
         );
     }

@@ -1,12 +1,11 @@
 import { DatabaseService } from "@backend/database/database.service";
 import { UserService } from "@backend/user/user.service";
 import getTFunction from "@backend/utils/get-t-function.util";
+import { getUserMentionAndName } from "@backend/utils/get-user-mention-and-name.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
-import { roleMention, userMention } from "discord.js";
 import { InsufficientPermissionError } from "./errors/insufficent-team-permission.error";
-import { TargetUserHasTeamError } from "./errors/target-user-has-team.error";
 import { TeamNotFoundError } from "./errors/team-not-found.error";
 import { TransferRequestAlreadyExistsError } from "./errors/transfer-request-already-exists.error";
 import { TransferRequestNotFoundError } from "./errors/transfer-request-not-found.error";
@@ -55,11 +54,6 @@ export class ToUserTransferRequestService {
             throw TransferRequestAlreadyExistsError(tFunction("transfer:send-to-user:request-already-exists"));
         }
 
-        const targetUserTeamIdAndRole = await this.teamRoleService.getTeamIdAndRole(targetUserId, guildId);
-        if (targetUserTeamIdAndRole) {
-            throw TargetUserHasTeamError(tFunction("transfer:send-to-user:target-user-already-in-team"));
-        }
-
         await this.userService.ensureDiscordUserExists(targetUserId);
 
         await this.databaseService.user_transfer_requests.create({
@@ -91,11 +85,17 @@ export class ToUserTransferRequestService {
                 select: { name: true },
             })
             .then((team) => team!.name);
-        const requesterName =
-            (await container.client.users.fetch(requestingUserId))?.username || tFunction("transfer:send-to-user:unknown-user");
+        const requesterUser = await container.client.users.fetch(requestingUserId);
+        const requesterNameWithMention = requesterUser
+            ? getUserMentionAndName(requesterUser)
+            : tFunction("transfer:send-to-user:unknown-user");
         const guildName = (await container.client.guilds.fetch(guildId))?.name || tFunction("transfer:send-to-user:unknown-guild");
 
-        const message = tFunction("transfer:send-to-user:notification", { guildName, teamName, requesterName });
+        const message = tFunction("transfer:send-to-user:notification", {
+            guildName,
+            teamName,
+            requesterName: requesterNameWithMention,
+        });
         await user.send(message);
     }
 
@@ -142,7 +142,8 @@ export class ToUserTransferRequestService {
     }
 
     async notifyTeamAboutResponse(userId: string, teamId: string, guildId, response: transfer_request_status): Promise<void> {
-        const userName = (await container.client.users.fetch(userId))?.username || "Unknown User";
+        const user = await container.client.users.fetch(userId);
+        const userName = getUserMentionAndName(user);
         const teamName = (await this.teamService.getTeamNameById(teamId)) || "Unknown Team";
         const guildName = (await container.client.guilds.fetch(guildId))?.name || "Unknown Guild";
 
@@ -151,8 +152,8 @@ export class ToUserTransferRequestService {
                 ? "transfer:respond-to-user-request:accepted"
                 : "transfer:respond-to-user-request:rejected";
         const messageArgs = {
-            userName: (): string => `${userMention(userId)} (${userName})`,
-            teamName: (): string => `${roleMention(teamId)} (${teamName})`,
+            userName: (): string => userName,
+            teamName: (): string => teamName,
             guildName: (): string => guildName,
         };
         await this.teamService.sendMessageToTeamCaptains(teamId, guildId, messageKey, messageArgs);
