@@ -27,21 +27,30 @@ const guildSettingsRecord: Record<guild_setting, SettingConfig> = {
         name: guild_setting.scoreboard_channel,
         description: "The channel where the scoreboard is posted",
         type: "channel",
-        defaultValue: null,
     },
     [guild_setting.fixture_channel]: {
         setting: guild_setting.fixture_channel,
         name: guild_setting.fixture_channel,
         description: "The channel where the fixture is posted",
         type: "channel",
-        defaultValue: null,
     },
     [guild_setting.transfer_channel]: {
         setting: guild_setting.transfer_channel,
         name: guild_setting.transfer_channel,
         description: "The channel where transfers are posted",
         type: "channel",
-        defaultValue: null,
+    },
+    [guild_setting.delete_transfer_requests_after_days]: {
+        setting: guild_setting.delete_transfer_requests_after_days,
+        name: "delete_transfer_req_after_days",
+        description: "Days (after response) transfer requests are deleted (so a new transfer request can be sent)",
+        type: "number",
+    },
+    [guild_setting.max_players_per_team]: {
+        setting: guild_setting.max_players_per_team,
+        name: guild_setting.max_players_per_team,
+        description: "The maximum number of players allowed in a team",
+        type: "number",
     },
 };
 

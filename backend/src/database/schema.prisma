@@ -65,6 +65,7 @@ model guilds {
   seasons                seasons[]
   team_transfer_requests team_transfer_requests[]
   teams                  teams[]
+  user_transfer_requests user_transfer_requests[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -110,7 +111,6 @@ model team_roles {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model team_transfer_requests {
   created_at                                                            DateTime                @default(now()) @db.Timestamptz(6)
-  guild_id                                                              String
   user_id                                                               String
   team_id                                                               String
   playtime                                                              Int?                    @db.SmallInt
@@ -119,6 +119,7 @@ model team_transfer_requests {
   status                                                                transfer_request_status @default(open)
   status_changed_by                                                     String?
   status_changed_at                                                     DateTime?               @db.Timestamptz(6)
+  guild_id                                                              String
   guilds                                                                guilds                  @relation(fields: [guild_id], references: [id], onDelete: Cascade)
   discord_users_team_transfer_requests_status_changed_byTodiscord_users discord_users?          @relation("team_transfer_requests_status_changed_byTodiscord_users", fields: [status_changed_by], references: [id])
   teams                                                                 teams                   @relation(fields: [team_id], references: [id], onDelete: Cascade)
@@ -156,6 +157,8 @@ model user_transfer_requests {
   status                                                           transfer_request_status @default(open)
   created_at                                                       DateTime                @default(now()) @db.Timestamptz(6)
   status_changed_at                                                DateTime?               @db.Timestamptz(6)
+  guild_id                                                         String
+  guilds                                                           guilds                  @relation(fields: [guild_id], references: [id], onDelete: Cascade)
   discord_users_user_transfer_requests_requester_idTodiscord_users discord_users           @relation("user_transfer_requests_requester_idTodiscord_users", fields: [requester_id], references: [id], onDelete: Cascade)
   teams                                                            teams                   @relation(fields: [team_id], references: [id], onDelete: Cascade)
   discord_users_user_transfer_requests_user_idTodiscord_users      discord_users           @relation("user_transfer_requests_user_idTodiscord_users", fields: [user_id], references: [id], onDelete: Cascade)
@@ -166,9 +169,11 @@ model user_transfer_requests {
 
 enum guild_setting {
   language
-  scoreboard_channel @map("scoreboard-channel")
-  fixture_channel    @map("fixture-channel")
-  transfer_channel   @map("transfer-channel")
+  scoreboard_channel                  @map("scoreboard-channel")
+  fixture_channel                     @map("fixture-channel")
+  transfer_channel                    @map("transfer-channel")
+  delete_transfer_requests_after_days @map("delete-transfer-requests-after-days")
+  max_players_per_team                @map("max-players-per-team")
 
   @@map("guild-setting")
 }

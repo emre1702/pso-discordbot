@@ -61,6 +61,7 @@ export class ToUserTransferRequestService {
                 requester_id: requestingUserId,
                 team_id: teamIdAndRole.team_id,
                 user_id: targetUserId,
+                guild_id: guildId,
             },
         });
 
