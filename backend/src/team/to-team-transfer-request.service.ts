@@ -10,6 +10,7 @@ import { InsufficientPermissionError } from "./insufficent-team-permission.error
 import { TeamNotFoundError } from "./team-not-found.error";
 import { TeamRoleService } from "./team-role.service";
 import { TeamService } from "./team.service";
+import { TransferRequestAlreadyExistsError } from "./transfer-request-already-exists.error";
 import { TransferRequestNotFoundError } from "./transfer-request-not-found.error";
 
 @Injectable()
@@ -27,12 +28,22 @@ export class ToTeamTransferRequestService {
         teamId: string,
         args: { playtime: number | null; positions: string | null; comment: string | null }
     ): Promise<void> {
-        //TODO: Check if request for the same team already exists
-
         const tFunction = await getTFunction({ guildId });
         const teamIdAndRole = await this.teamRoleService.getTeamIdAndRole(userId, guildId);
         if (teamIdAndRole) {
             throw AlreadyInATeamError(tFunction("transfer:send-to-team:already-in-a-team"));
+        }
+
+        //TODO: Make user_id and team_id a PK in the transfer requests table and use findUnique instead of findFirst
+        const previousTransferRequest = await this.databaseService.team_transfer_requests.findFirst({
+            where: {
+                user_id: userId,
+                guild_id: guildId,
+                team_id: teamId,
+            },
+        });
+        if (previousTransferRequest) {
+            throw TransferRequestAlreadyExistsError(tFunction("transfer:send-to-team:request-already-exists"));
         }
 
         const teamExists = await this.teamService.getTeamExists(teamId);

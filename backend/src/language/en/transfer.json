@@ -9,7 +9,8 @@
         "no-playtime": "Not provided",
         "no-positions": "Not provided",
         "no-comment": "No comment provided",
-        "already-in-a-team": "The user is already in a team."
+        "already-in-a-team": "The user is already in a team.",
+        "request-already-exists": "You've already sent a transfer request to this team."
     },
     "respond-to-team-request": {
         "not-in-a-team": "You are not in a team.",
@@ -27,7 +28,8 @@
         "target-user-already-in-team": "The target user is already in a team.",
         "notification": "You have received a transfer request from **{{ requesterName }}** in server **{{ guildName }}** for team **{{ teamName }}**.\nRespond to it using the command **/transfer-request respond-team**.",
         "unknown-user": "Unknown user",
-        "unknown-guild": "Unknown server"
+        "unknown-guild": "Unknown server",
+        "request-already-exists": "You've already sent a transfer request to this user."
     },
     "respond-to-user-request": {
         "already-in-a-team": "You are already in a team.",
