@@ -3,7 +3,7 @@
         "team-not-found": "Team not found. Please ensure the team exists.",
         "error": "An error occurred while sending the transfer request. {{ error }}",
         "success": "Transfer request sent successfully to team {{ teamName }}.",
-        "notification": "User {{ user }} has sent a transfer request to your team {{ team }} in the guild {{ guild }}.\nPlaytime: {{ playtime }}\nPositions: {{ positions }}\nComment: {{ comment }}",
+        "notification": "User {{ user }} has sent a transfer request to your team {{ team }} in the guild {{ guild }}.\nPlaytime: {{ playtime }}\nPositions: {{ positions }}\nComment: {{ comment }}\nRespond to it using the command **/transfer-request respond-user**.",
         "unknown-team": "Unknown team",
         "unknown-guild": "Unknown guild",
         "no-playtime": "Not provided",
@@ -22,7 +22,7 @@
         "team-not-found": "You are not in a team.",
         "you-are-not-allowed": "You are not allowed to send transfer requests to users.",
         "target-user-already-in-team": "The target user is already in a team.",
-        "notification": "You have received a transfer request from **{{ requesterName }}** in server **{{ guildName }}** for team **{{ teamName }}**."
+        "notification": "You have received a transfer request from **{{ requesterName }}** in server **{{ guildName }}** for team **{{ teamName }}**.\nRespond to it using the command **/transfer-request respond-team**."
     },
     "respond-to-user-request": {
         "already-in-a-team": "You are already in a team.",

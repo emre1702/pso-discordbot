@@ -72,7 +72,6 @@ export class ToUserTransferRequestService {
         const requesterName = (await container.client.users.fetch(requestingUserId))?.username || "Unknown User";
         const guildName = (await container.client.guilds.fetch(guildId))?.name || "Unknown Guild";
 
-        //TODO: Modify message so it says what to do next, e.g., accept or decline the transfer request with command xyz
         const message = tFunction("transfer:send-to-user:notification", { guildName, teamName, requesterName });
         await user.send(message);
     }
