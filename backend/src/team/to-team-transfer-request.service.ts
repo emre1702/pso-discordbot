@@ -4,6 +4,7 @@ import getTFunction from "@backend/utils/get-t-function.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
+import { roleMention, userMention } from "discord.js";
 import { InsufficientPermissionError } from "./insufficent-team-permission.error";
 import { TeamNotFoundError } from "./team-not-found.error";
 import { TeamRoleService } from "./team-role.service";
@@ -64,12 +65,13 @@ export class ToTeamTransferRequestService {
         }
         const guild = container.client.guilds.cache.get(guildId);
         const teamName = await this.teamService.getTeamNameById(teamId);
-        //TODO: Modify message so it says what to do next, e.g., accept or decline the transfer request with command xyz
         const messageKey = "transfer:send-to-team:notification";
         const messageArgs: Parameters<TeamService["sendMessageToTeamCaptains"]>[3] = {
-            team: teamName ? (): string => teamName : (tFunc): string => tFunc("transfer:send-to-team:unknown-team"),
+            team: teamName
+                ? (): string => `${roleMention(teamId)} (${teamName})`
+                : (tFunc): string => tFunc("transfer:send-to-team:unknown-team"),
             guild: guild ? (): string => guild.name : (tFunc): string => tFunc("transfer:send-to-team:unknown-guild"),
-            user: (): string => user.username,
+            user: (): string => `${userMention(user.id)} (${user.username})`,
             playtime: playtime ? (): string => playtime.toString() : (tFunc): string => tFunc("transfer:send-to-team:no-playtime"),
             positions: positions ? (): string => positions : (tFunc): string => tFunc("transfer:send-to-team:no-positions"),
             comment: comment ? (): string => comment : (tFunc): string => tFunc("transfer:send-to-team:no-comment"),
@@ -115,7 +117,6 @@ export class ToTeamTransferRequestService {
             throw TransferRequestNotFoundError(tFunction("transfer:respond-to-team-request:request-not-found"));
         }
 
-        //TODO: In command send responder message "transfer:respond-to-team-request:you-have-accepted"
         if (response === transfer_request_status.accepted) {
             await this.teamRoleService.setTeamRole(teamIdAndRole.team_id, responderId, team_role.Player);
             //TODO: Send a message to the transfer channel
@@ -150,9 +151,9 @@ export class ToTeamTransferRequestService {
                 : "transfer:respond-to-team-request:rejected";
         requester.send(
             tFunction(messageKey, {
-                teamName: teamName ?? "?",
+                teamName: `${roleMention(teamId)} (${teamName ?? "?"})`,
                 guildName: guild.name,
-                responderName,
+                responderName: `${userMention(responderId)} (${responderName})`,
             })
         );
     }

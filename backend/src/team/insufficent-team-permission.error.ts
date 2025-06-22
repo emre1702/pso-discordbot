@@ -1,9 +1,11 @@
-export interface InsufficientPermissionError extends Error {
+import { UserFacingError } from "@backend/utils/models/user-facing.error";
+
+export interface InsufficientPermissionError extends UserFacingError {
     name: "InsufficientPermissionError";
 }
 
 export function InsufficientPermissionError(message?: string): InsufficientPermissionError {
-    const error = new Error() as InsufficientPermissionError;
+    const error = new UserFacingError() as InsufficientPermissionError;
     error.name = "InsufficientPermissionError";
     error.message = message ?? "You are not allowed to perform this action.";
     return error;

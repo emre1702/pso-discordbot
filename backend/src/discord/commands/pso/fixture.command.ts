@@ -1,5 +1,6 @@
 import { FixtureService } from "@backend/fixture/fixture.service";
 import getTFunction from "@backend/utils/get-t-function.util";
+import { isUserFacingError } from "@backend/utils/models/user-facing.error";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { InteractionContextType, MessageFlags, PermissionFlagsBits } from "discord.js";
@@ -106,7 +107,9 @@ export class FixtureCommand extends Subcommand {
 
             await interaction.editReply({ content: tFunction("fixture:create:success", { season }) });
         } catch (error) {
-            this.container.nestLogger.error(`Failed to create fixture: ${error}`);
+            if (!isUserFacingError(error)) {
+                this.container.nestLogger.error(`Failed to create fixture: ${error}`);
+            }
             await interaction.editReply({
                 content: tFunction("fixture:create:error", {
                     error: error instanceof Error ? error.message : String(error),

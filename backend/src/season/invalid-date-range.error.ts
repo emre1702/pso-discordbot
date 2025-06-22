@@ -1,9 +1,11 @@
-export interface InvalidDateRangeError extends Error {
+import { UserFacingError } from "@backend/utils/models/user-facing.error";
+
+export interface InvalidDateRangeError extends UserFacingError {
     name: "InvalidDateRangeError";
 }
 
 export function InvalidDateRangeError(message?: string): InvalidDateRangeError {
-    const error = new Error() as InvalidDateRangeError;
+    const error = new UserFacingError() as InvalidDateRangeError;
     error.name = "InvalidDateRangeError";
     error.message = message ?? "The provided date range is invalid. The end date cannot be before the start date.";
     return error;

@@ -1,9 +1,11 @@
-export interface NoActiveSeasonError extends Error {
+import { UserFacingError } from "@backend/utils/models/user-facing.error";
+
+export interface NoActiveSeasonError extends UserFacingError {
     name: "NoActiveSeasonError";
 }
 
 export function NoActiveSeasonError(message?: string): NoActiveSeasonError {
-    const error = new Error() as NoActiveSeasonError;
+    const error = new UserFacingError() as NoActiveSeasonError;
     error.name = "NoActiveSeasonError";
     error.message = message ?? "Season not found. Please provide a valid season or none if there is an active one.";
     return error;

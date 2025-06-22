@@ -1,6 +1,6 @@
-import { isInvalidDateRangeError } from "@backend/season/invalid-date-range.error";
 import { SeasonService } from "@backend/season/season.service";
 import getTFunction from "@backend/utils/get-t-function.util";
+import { isUserFacingError } from "@backend/utils/models/user-facing.error";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { resolveKey } from "@sapphire/plugin-i18next";
 import { Subcommand } from "@sapphire/plugin-subcommands";
@@ -126,7 +126,7 @@ export class SeasonCommand extends Subcommand {
                 }),
             });
         } catch (error) {
-            if (!isInvalidDateRangeError(error)) {
+            if (!isUserFacingError(error)) {
                 this.container.nestLogger.error("Error creating season", error);
             }
             await interaction.editReply({
@@ -164,7 +164,9 @@ export class SeasonCommand extends Subcommand {
                 content: tFunction("season:list:success", { seasons: seasonList }),
             });
         } catch (error) {
-            this.container.nestLogger.error("Error listing seasons. " + error);
+            if (!isUserFacingError(error)) {
+                this.container.nestLogger.error("Error listing seasons. " + error);
+            }
             await interaction.editReply({
                 content: tFunction("season:list:error", {
                     error: error instanceof Error ? error.message : "Unknown error",
@@ -204,7 +206,7 @@ export class SeasonCommand extends Subcommand {
                 });
             }
         } catch (error) {
-            if (!isInvalidDateRangeError(error)) {
+            if (!isUserFacingError(error)) {
                 this.container.nestLogger.error("Error editing season", error);
             }
             await interaction.editReply({

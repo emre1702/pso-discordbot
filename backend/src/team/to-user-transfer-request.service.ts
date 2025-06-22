@@ -4,6 +4,7 @@ import getTFunction from "@backend/utils/get-t-function.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
+import { roleMention, userMention } from "discord.js";
 import { AlreadyInATeamError } from "./already-in-a-team.error";
 import { InsufficientPermissionError } from "./insufficent-team-permission.error";
 import { TargetUserHasTeamError } from "./target-user-has-team.error";
@@ -21,6 +22,11 @@ export class ToUserTransferRequestService {
         private readonly teamRoleService: TeamRoleService
     ) {}
 
+    /**
+     * @throws {@link TeamNotFoundError}
+     * @throws {@link InsufficientPermissionError}
+     * @throws {@link TargetUserHasTeamError}
+     */
     async createTransferRequestToUser(requestingUserId: string, targetUserId: string, guildId: string): Promise<void> {
         //TODO: Check if transfer request from this team to this user already exists
 
@@ -69,13 +75,18 @@ export class ToUserTransferRequestService {
                 select: { name: true },
             })
             .then((team) => team!.name);
-        const requesterName = (await container.client.users.fetch(requestingUserId))?.username || "Unknown User";
-        const guildName = (await container.client.guilds.fetch(guildId))?.name || "Unknown Guild";
+        const requesterName =
+            (await container.client.users.fetch(requestingUserId))?.username || tFunction("transfer:send-to-user:unknown-user");
+        const guildName = (await container.client.guilds.fetch(guildId))?.name || tFunction("transfer:send-to-user:unknown-guild");
 
         const message = tFunction("transfer:send-to-user:notification", { guildName, teamName, requesterName });
         await user.send(message);
     }
 
+    /**
+     * @throws {@link AlreadyInATeamError}
+     * @throws {@link TransferRequestNotFoundError}
+     */
     async respondToUserTransferRequest(
         userId: string,
         guildId: string,
@@ -126,8 +137,8 @@ export class ToUserTransferRequestService {
                 ? "transfer:respond-to-user-request:accepted"
                 : "transfer:respond-to-user-request:rejected";
         const messageArgs = {
-            userName: (): string => userName,
-            teamName: (): string => teamName,
+            userName: (): string => `${userMention(userId)} (${userName})`,
+            teamName: (): string => `${roleMention(teamId)} (${teamName})`,
             guildName: (): string => guildName,
         };
         await this.teamService.sendMessageToTeamCaptains(teamId, guildId, messageKey, messageArgs);

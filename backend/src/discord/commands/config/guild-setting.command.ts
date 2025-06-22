@@ -1,6 +1,7 @@
 import { GuildSettingService } from "@backend/setting/guild-setting.service";
 import guildSettingsRecord from "@backend/setting/guild-settings";
 import getTFunction from "@backend/utils/get-t-function.util";
+import { isUserFacingError } from "@backend/utils/models/user-facing.error";
 import { guild_setting } from "@prisma/client";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { Subcommand, SubcommandMappingGroup } from "@sapphire/plugin-subcommands";
@@ -172,7 +173,9 @@ export class ServerSettingCommand extends Subcommand {
             const displayedValue = setting.choices?.find((choice) => choice.value === value)?.name ?? value;
             await interaction.editReply(tFunction("config:guild-setting:set", { key: setting.name, value: displayedValue }));
         } catch (error) {
-            this.container.nestLogger.error(error);
+            if (!isUserFacingError(error)) {
+                this.container.nestLogger.error(error);
+            }
             await interaction.editReply(
                 tFunction("config:guild-setting:set-error", { key, error: error instanceof Error ? error.message : String(error) })
             );

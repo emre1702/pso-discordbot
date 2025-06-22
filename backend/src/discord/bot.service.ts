@@ -20,6 +20,7 @@ export class BotService {
     ) {
         ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(RegisterBehavior.BulkOverwrite);
         container.moduleRef = moduleRef;
+        //TODO: Configure a decent logger before deploying to a production environment
         container.nestLogger = logger;
 
         this.client = this.initClient();

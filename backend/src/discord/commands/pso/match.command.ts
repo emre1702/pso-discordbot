@@ -1,7 +1,6 @@
 import { MatchService } from "@backend/match/match.service";
-import { isNoActiveSeasonError } from "@backend/match/no-active-season.error";
-import { isNoFixtureFoundError } from "@backend/match/no-fixture-found.error";
 import getTFunction from "@backend/utils/get-t-function.util";
+import { isUserFacingError } from "@backend/utils/models/user-facing.error";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { resolveKey } from "@sapphire/plugin-i18next";
 import { Subcommand } from "@sapphire/plugin-subcommands";
@@ -189,7 +188,7 @@ export class MatchCommand extends Subcommand {
                 await resolveKey(interaction, "match:create:success", { homeTeam: homeRole.name, awayTeam: awayRole.name })
             );
         } catch (error) {
-            if (!isNoActiveSeasonError(error) && !isNoFixtureFoundError(error)) {
+            if (!isUserFacingError(error)) {
                 this.container.nestLogger.error(`Failed to create match: ${error}`);
             }
             await interaction.editReply(
@@ -219,7 +218,9 @@ export class MatchCommand extends Subcommand {
             const message = new MessagePayload(interaction.channel!, { content });
             await interaction.editReply(message);
         } catch (error) {
-            this.container.nestLogger.error(`Failed to list matches: ${error}`);
+            if (!isUserFacingError(error)) {
+                this.container.nestLogger.error(`Failed to list matches: ${error}`);
+            }
             await interaction.editReply(
                 await resolveKey(interaction, "match:list:error", { error: error instanceof Error ? error.message : error })
             );

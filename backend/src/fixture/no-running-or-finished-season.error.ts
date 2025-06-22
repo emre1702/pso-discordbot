@@ -1,9 +1,11 @@
-export interface NoRunningOrFinishedSeasonError extends Error {
+import { UserFacingError } from "@backend/utils/models/user-facing.error";
+
+export interface NoRunningOrFinishedSeasonError extends UserFacingError {
     name: "NoRunningOrFinishedSeasonError";
 }
 
 export function NoRunningOrFinishedSeasonError(message?: string): NoRunningOrFinishedSeasonError {
-    const error = new Error() as NoRunningOrFinishedSeasonError;
+    const error = new UserFacingError() as NoRunningOrFinishedSeasonError;
     error.name = "NoRunningOrFinishedSeasonError";
     error.message = message ?? "The season can't be a running or finished season. Please specify a future season.";
     return error;

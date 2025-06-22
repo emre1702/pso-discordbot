@@ -1,10 +1,11 @@
 import { RoleService } from "@backend/discord/role/role.service";
 import { TeamService } from "@backend/team/team.service";
 import getTFunction from "@backend/utils/get-t-function.util";
+import { isUserFacingError } from "@backend/utils/models/user-facing.error";
 import { CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { resolveKey } from "@sapphire/plugin-i18next";
 import { Subcommand } from "@sapphire/plugin-subcommands";
-import { ColorResolvable, GuildPremiumTier, InteractionContextType, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { ColorResolvable, GuildPremiumTier, InteractionContextType, MessageFlags, PermissionFlagsBits, Role } from "discord.js";
 
 export class ManageTeamCommand extends Subcommand {
     constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -116,18 +117,6 @@ export class ManageTeamCommand extends Subcommand {
                 return;
             }
 
-            let team: Awaited<ReturnType<TeamService["addTeam"]>>;
-            try {
-                team = await teamService.addTeam(interaction.guildId!, teamName, shortName, owner.id, interaction.user.id);
-                await interaction.followUp(await resolveKey(interaction, "team:create:success", { teamName: team.name }));
-            } catch (error) {
-                this.container.nestLogger.error(`Failed to create team: ${error}`);
-                await interaction.followUp(
-                    await resolveKey(interaction, "team:create:error", { error: error instanceof Error ? error.message : "Unknown error" })
-                );
-                return;
-            }
-
             const alreadyCreatedRole = (await interaction.guild!.roles.fetch()).find(
                 (role) => role.name.toLowerCase() === team.name.toLowerCase()
             );
@@ -141,21 +130,40 @@ export class ManageTeamCommand extends Subcommand {
                 icon = null; // Reset icon if the guild does not meet the requirements
             }
 
+            let role: Role;
             try {
-                const role = await roleService.createTeamRole(interaction.guild!.roles, team.name, color, icon);
+                role = await roleService.createTeamRole(interaction.guild!.roles, teamName, color, icon);
                 await interaction.followUp(await resolveKey(interaction, "role:create:success", { roleName: role.name }));
 
                 // Assign the role to the team owner
                 await interaction.guild!.members.fetch(owner.id).then((member) => member.roles.add(role, "Owner of the team " + team.name));
             } catch (error) {
-                this.container.nestLogger.error(`Failed to create role for team: ${error}`);
+                if (!isUserFacingError(error)) {
+                    this.container.nestLogger.error(`Failed to create role for team: ${error}`);
+                }
                 await interaction.followUp(
                     await resolveKey(interaction, "role:create:error", { error: error instanceof Error ? error.message : "Unknown error" })
                 );
                 return;
             }
+
+            let team: Awaited<ReturnType<TeamService["addTeam"]>>;
+            try {
+                team = await teamService.addTeam(role.id, interaction.guildId!, teamName, shortName, owner.id, interaction.user.id);
+                await interaction.followUp(await resolveKey(interaction, "team:create:success", { teamName: team.name }));
+            } catch (error) {
+                if (!isUserFacingError(error)) {
+                    this.container.nestLogger.error(`Failed to create team: ${error}`);
+                }
+                await interaction.followUp(
+                    await resolveKey(interaction, "team:create:error", { error: error instanceof Error ? error.message : "Unknown error" })
+                );
+                return;
+            }
         } catch (error) {
-            this.container.nestLogger.error(`Failed to create team: ${error}`);
+            if (!isUserFacingError(error)) {
+                this.container.nestLogger.error(`Failed to create team: ${error}`);
+            }
             await interaction.followUp(
                 await resolveKey(interaction, "team:create:error", { error: error instanceof Error ? error.message : "Unknown error" })
             );
@@ -171,19 +179,20 @@ export class ManageTeamCommand extends Subcommand {
         const teamService = this.container.moduleRef.get(TeamService, { strict: false });
 
         try {
-            const result = await teamService.deleteTeamByName(interaction.guildId!, teamRole.name);
+            const result = await teamService.deleteTeam(teamRole.id);
 
-            if (result.count === 0) {
+            if (!result) {
                 await interaction.editReply(tFunction("team:delete:not-found", { teamName: teamRole.name }));
                 return;
             }
             await interaction.editReply(tFunction("team:delete:success", { teamName: teamRole.name }));
         } catch (error) {
-            this.container.nestLogger.error(`Failed to delete team: ${error}`);
+            if (!isUserFacingError(error)) {
+                this.container.nestLogger.error(`Failed to delete team: ${error}`);
+            }
             await interaction.editReply(tFunction("team:delete:error", { error: error instanceof Error ? error.message : error }));
         }
 
-        const roleService = this.container.moduleRef.get(RoleService, { strict: false });
-        await roleService.deleteRoleByName(interaction.guild!.roles, teamRole.name);
+        await interaction.guild?.roles.delete(teamRole.id, "Team deleted");
     }
 }
