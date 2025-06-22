@@ -11,6 +11,7 @@ import { TargetUserHasTeamError } from "./target-user-has-team.error";
 import { TeamNotFoundError } from "./team-not-found.error";
 import { TeamRoleService } from "./team-role.service";
 import { TeamService } from "./team.service";
+import { TransferRequestAlreadyExistsError } from "./transfer-request-already-exists.error";
 import { TransferRequestNotFoundError } from "./transfer-request-not-found.error";
 
 @Injectable()
@@ -26,10 +27,9 @@ export class ToUserTransferRequestService {
      * @throws {@link TeamNotFoundError}
      * @throws {@link InsufficientPermissionError}
      * @throws {@link TargetUserHasTeamError}
+     * @throws {@link TransferRequestAlreadyExistsError}
      */
     async createTransferRequestToUser(requestingUserId: string, targetUserId: string, guildId: string): Promise<void> {
-        //TODO: Check if transfer request from this team to this user already exists
-
         const tFunction = await getTFunction({ userId: requestingUserId, guildId: guildId });
         const teamIdAndRole = await this.teamRoleService.getTeamIdAndRole(requestingUserId, guildId);
         if (!teamIdAndRole) {
@@ -37,6 +37,18 @@ export class ToUserTransferRequestService {
         }
         if (teamIdAndRole.role !== team_role.Captain && teamIdAndRole.role !== team_role.Co_Captain) {
             throw InsufficientPermissionError(tFunction("transfer:send-to-user:you-are-not-allowed"));
+        }
+
+        const previousTransferRequest = await this.databaseService.user_transfer_requests.findUnique({
+            where: {
+                team_id_user_id: {
+                    team_id: teamIdAndRole.team_id,
+                    user_id: targetUserId,
+                },
+            },
+        });
+        if (previousTransferRequest) {
+            throw TransferRequestAlreadyExistsError(tFunction("transfer:send-to-user:request-already-exists"));
         }
 
         const targetUserTeamIdAndRole = await this.teamRoleService.getTeamIdAndRole(targetUserId, guildId);
