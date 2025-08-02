@@ -3,14 +3,14 @@
         "team-not-found": "Team not found. Please ensure the team exists.",
         "error": "An error occurred while sending the transfer request. {{ error }}",
         "success": "Transfer request sent successfully to team {{ teamName }}.",
-        "notification": "User {{ user }} has sent a transfer request to your team {{ team }} in the server {{ guild }}.\nPlaytime: {{ playtime }}\nPositions: {{ positions }}\nComment: {{ comment }}\nRespond to it using the command **/transfer-request respond-user** in any of the servers text-channels.",
+        "notification": "User {{ user }} has sent a transfer request to your team {{ team }} in the server {{ guild }}.\nPlaytime: {{ playtime }}\nPositions: {{ positions }}\nComment: {{ comment }}\nRespond to it using the command `/transfer-request respond-user` in any of the servers text-channels.",
         "unknown-team": "Unknown team",
         "unknown-guild": "Unknown server",
         "no-playtime": "Not provided",
         "no-positions": "Not provided",
         "no-comment": "No comment provided",
         "already-in-a-team": "The user is already in a team.",
-        "request-already-exists": "You've already sent a transfer request to this team."
+        "request-already-exists": "You've already sent a transfer request to this team. Tell the team captains to either respond to it or delete it with `/transfer-request delete-to-team`."
     },
     "respond-to-team-request": {
         "not-in-a-team": "You are not in a team.",
@@ -25,10 +25,10 @@
     "send-to-user": {
         "team-not-found": "You are not in a team.",
         "you-are-not-allowed": "You are not allowed to send transfer requests to users.",
-        "notification": "You have received a transfer request from **{{ requesterName }}** in server **{{ guildName }}** for team **{{ teamName }}**.\nRespond to it using the command **/transfer-request respond-team** in any of the servers text-channels.",
+        "notification": "You have received a transfer request from **{{ requesterName }}** in server **{{ guildName }}** for team **{{ teamName }}**.\nRespond to it using the command `/transfer-request respond-team` in any of the servers text-channels.",
         "unknown-user": "Unknown user",
         "unknown-guild": "Unknown server",
-        "request-already-exists": "You've already sent a transfer request to this user.",
+        "request-already-exists": "You've already sent a transfer request to this user. Tell the user to either respond to it or delete it with `/transfer-request delete-to-user`.",
         "success": "Transfer request sent successfully to user **{{ user }}**.",
         "error": "An error occurred while sending the transfer request. {{ error }}"
     },
@@ -43,5 +43,18 @@
         "message-transfer": "# Transfer - {{ user }}\n## {{ oldTeam }}  ->  {{ newTeam }}",
         "message-free-agent": "# Free agent - {{ user }}\n## {{ oldTeam }}  ->  Free Agent",
         "free-agent": "Free Agent"
+    },
+    "delete-to-team": {
+        "success": "Transfer request to **{{ team }}** deleted successfully.",
+        "error": "An error occurred while deleting the transfer request. {{ error }}",
+        "team-not-found": "The team does not exist.",
+        "request-not-found": "The transfer request was not found."
+    },
+    "delete-to-user": {
+        "success": "Transfer request to **{{ user }}** deleted successfully.",
+        "error": "An error occurred while deleting the transfer request. {{ error }}",
+        "team-not-found": "You are not in a team.",
+        "you-are-not-allowed": "You are not allowed to delete transfer requests to users.",
+        "request-not-found": "The transfer request was not found."
     }
 }

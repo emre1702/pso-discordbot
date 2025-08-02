@@ -1,3 +1,6 @@
 {
-    "reply": "Pong! 🏓"
+    "reply": "Pong! 🏓",
+    "message": {
+        "send-failed": "Failed to send message to **{{ username }}** (**{{ userId }}**): {{ error }}."
+    }
 }

@@ -37,6 +37,16 @@ export class TransferRequestCommand extends Subcommand {
                     chatInputRun: "chatInputRespondTeamRun",
                     requiredClientPermissions: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageRoles],
                 },
+                {
+                    name: "delete-to-team",
+                    chatInputRun: "chatInputDeleteToTeamRun",
+                    requiredClientPermissions: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageRoles],
+                },
+                {
+                    name: "delete-to-user",
+                    chatInputRun: "chatInputDeleteToUserRun",
+                    requiredClientPermissions: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageRoles],
+                },
             ],
         });
         this.toTeamTransferService = this.container.moduleRef.get(ToTeamTransferRequestService, { strict: false });
@@ -128,6 +138,28 @@ export class TransferRequestCommand extends Subcommand {
                                 .addChoices({ name: "Accept", value: "accepted" }, { name: "Reject", value: "rejected" })
                         )
                 )
+                .addSubcommand((subcommand) =>
+                    subcommand //
+                        .setName("delete-to-team")
+                        .setDescription("Delete your transfer request to a team")
+                        .addRoleOption((option) =>
+                            option //
+                                .setName("team")
+                                .setDescription("The team to delete the transfer request for")
+                                .setRequired(true)
+                        )
+                )
+                .addSubcommand((subcommand) =>
+                    subcommand //
+                        .setName("delete-to-user")
+                        .setDescription("Delete your teams transfer request to a user")
+                        .addUserOption((option) =>
+                            option //
+                                .setName("user")
+                                .setDescription("The user to delete the transfer request for")
+                                .setRequired(true)
+                        )
+                )
         );
     }
 
@@ -212,6 +244,44 @@ export class TransferRequestCommand extends Subcommand {
             }
             await interaction.editReply({
                 content: tFunction("transfer:respond-to-user-request:error", { error: error instanceof Error ? error.message : error }),
+            });
+        }
+    }
+
+    async chatInputDeleteToTeamRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        const tFunction = await getTFunction(interaction);
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        try {
+            const teamRole = interaction.options.getRole("team", true);
+            await this.toTeamTransferService.delete(interaction.user.id, interaction.guildId!, teamRole.id);
+            await interaction.editReply({
+                content: tFunction("transfer:delete-to-team:success", { team: roleMention(teamRole.id) }),
+            });
+        } catch (error) {
+            if (!isUserFacingError(error)) {
+                this.container.nestLogger.error(error);
+            }
+            await interaction.editReply({
+                content: tFunction("transfer:delete-to-team:error", { error: error instanceof Error ? error.message : error }),
+            });
+        }
+    }
+
+    async chatInputDeleteToUserRun(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        const tFunction = await getTFunction(interaction);
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        try {
+            const user = interaction.options.getUser("user", true);
+            await this.toUserTransferService.delete(interaction.user.id, interaction.guildId!, user.id);
+            await interaction.editReply({
+                content: tFunction("transfer:delete-to-user:success", { user: userMention(user.id) }),
+            });
+        } catch (error) {
+            if (!isUserFacingError(error)) {
+                this.container.nestLogger.error(error);
+            }
+            await interaction.editReply({
+                content: tFunction("transfer:delete-to-user:error", { error: error instanceof Error ? error.message : error }),
             });
         }
     }

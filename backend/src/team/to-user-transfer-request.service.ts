@@ -2,6 +2,7 @@ import { DatabaseService } from "@backend/database/database.service";
 import { UserService } from "@backend/user/user.service";
 import getTFunction from "@backend/utils/get-t-function.util";
 import { getUserMentionAndName } from "@backend/utils/get-user-mention-and-name.util";
+import { sendMessage } from "@backend/utils/send-message.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
@@ -97,7 +98,7 @@ export class ToUserTransferRequestService {
             teamName,
             requesterName: requesterNameWithMention,
         });
-        await user.send(message).catch(() => {});
+        await sendMessage(user, message, requesterUser);
     }
 
     /**
@@ -160,5 +161,34 @@ export class ToUserTransferRequestService {
             guildName: (): string => guildName,
         };
         await this.teamService.sendMessageToTeamCaptains(teamId, guildId, messageKey, messageArgs);
+    }
+
+    //TODO: My request to a user => Request gets rejected
+    //TODO: A request to me => Request gets deleted.
+    async delete(requesterId: string, userId: string, guildId: string): Promise<void> {
+        const tFunction = await getTFunction({ guildId, userId: requesterId });
+        const teamIdAndRole = await this.teamRoleService.getTeamIdAndRole(requesterId, guildId);
+        if (!teamIdAndRole) {
+            throw TeamNotFoundError(tFunction("transfer:delete-to-user:team-not-found"));
+        }
+        if (teamIdAndRole.role !== team_role.Captain && teamIdAndRole.role !== team_role.Co_Captain) {
+            throw InsufficientPermissionError(tFunction("transfer:delete-to-user:you-are-not-allowed"));
+        }
+
+        const transferRequest = await this.databaseService.user_transfer_requests.delete({
+            where: {
+                team_id_user_id: {
+                    team_id: teamIdAndRole.team_id,
+                    user_id: userId,
+                },
+            },
+            select: {
+                user_id: true,
+            },
+        });
+
+        if (!transferRequest) {
+            throw TransferRequestNotFoundError(tFunction("transfer:delete-to-user:request-not-found"));
+        }
     }
 }

@@ -1,6 +1,7 @@
 import { DatabaseService } from "@backend/database/database.service";
 import { UserService } from "@backend/user/user.service";
 import getTFunction from "@backend/utils/get-t-function.util";
+import { sendMessage } from "@backend/utils/send-message.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, teams } from "@prisma/client";
 import { container } from "@sapphire/framework";
@@ -135,7 +136,7 @@ export class TeamService {
 
             // Send the notification to the captain
             const captainUser = await container.client.users.fetch(captainId);
-            await captainUser.send(message).catch(() => {});
+            await sendMessage(captainUser, message);
         }
     }
 

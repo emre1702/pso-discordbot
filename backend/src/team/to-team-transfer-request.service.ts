@@ -2,6 +2,7 @@ import { DatabaseService } from "@backend/database/database.service";
 import { UserService } from "@backend/user/user.service";
 import getTFunction from "@backend/utils/get-t-function.util";
 import { getUserMentionAndName } from "@backend/utils/get-user-mention-and-name.util";
+import { sendMessage } from "@backend/utils/send-message.util";
 import { Injectable } from "@nestjs/common";
 import { team_role, transfer_request_status } from "@prisma/client";
 import { container } from "@sapphire/framework";
@@ -111,7 +112,6 @@ export class ToTeamTransferRequestService {
 
         await this.userService.ensureDiscordUserExists(requesterId);
 
-        //TODO: Add command to delete transfer requests so the teams can send new ones
         //TODO: Add setting "max-team-size" (or smth. like that) to prevent teams from accepting too many players
         const result = await this.databaseService.team_transfer_requests.update({
             where: {
@@ -173,22 +173,24 @@ export class ToTeamTransferRequestService {
             response === transfer_request_status.accepted
                 ? "transfer:respond-to-team-request:accepted"
                 : "transfer:respond-to-team-request:rejected";
-        requester
-            .send(
-                tFunction(messageKey, {
-                    teamName,
-                    guildName: guild.name,
-                    responderName: getUserMentionAndName(responder),
-                })
-            )
-            .catch(() => {});
+        await sendMessage(
+            requester,
+            tFunction(messageKey, {
+                teamName,
+                guildName: guild.name,
+                responderName: getUserMentionAndName(responder),
+            }),
+            responder
+        );
     }
 
+    //TODO: My requests to a team => Request gets rejected
+    //TODO: A request to my team (I am a captain) => Request gets deleted.
     async delete(userId: string, guildId: string, teamId: string): Promise<void> {
         const tFunction = await getTFunction({ guildId, userId });
         const teamExists = await this.teamService.getTeamExists(teamId);
         if (!teamExists) {
-            throw TeamNotFoundError(tFunction("transfer:to-team-transfer:delete:team-not-found"));
+            throw TeamNotFoundError(tFunction("transfer:delete-to-team:team-not-found"));
         }
 
         const transferRequest = await this.databaseService.team_transfer_requests.delete({
@@ -204,7 +206,7 @@ export class ToTeamTransferRequestService {
         });
 
         if (!transferRequest) {
-            throw TransferRequestNotFoundError(tFunction("transfer:to-team-transfer:delete:request-not-found"));
+            throw TransferRequestNotFoundError(tFunction("transfer:delete-to-team:request-not-found"));
         }
     }
 }
